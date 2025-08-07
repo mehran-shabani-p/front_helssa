@@ -309,8 +309,8 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
   }
 
   Future<void> sendMessage() async {
-    final text = messageController.text.trim();
-    if (text.isEmpty) return;
+    Future<void> sendMessage(String text, List<String> imagesBase64) async {
+      if (text.isEmpty && imagesBase64.isEmpty) return;
 
     final DateTime now = DateTime.now();
     final userMessage = {
@@ -318,6 +318,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
       'text': text,
       'sender': 'user',
       'timestamp': now.toIso8601String(),
+      'hasImage': imagesBase64.isNotEmpty,
     };
 
     setState(() {
@@ -340,12 +341,23 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
     try {
       final response = await http
           .post(
-            Uri.parse('$baseUrl/api/chat/'),
+            Uri.parse('$baseUrl/chat/msg/'),
             headers: {
               'Content-Type': 'application/json; charset=utf-8',
               'Authorization': 'Bearer $accessToken',
             },
-            body: jsonEncode({'message': text}),
+            body: jsonEncode(
+               imagesBase64.isEmpty                  // ❹ ساخت بدنه متناسب با وجود/نبود تصویر
+                   ? {
+                       'message': text,
+                     }
+                   : {
+                       'message': text,
+                       'images': imagesBase64            // [ {'image': '<base64>'}, … ]
+                           .map((b64) => {'image': b64})
+                           .toList(),
+                     },
+             ),
           )
           .timeout(const Duration(seconds: 25));
 
