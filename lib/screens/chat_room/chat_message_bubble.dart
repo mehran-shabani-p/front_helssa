@@ -133,7 +133,7 @@ class ChatMessageBubble extends StatelessWidget {
     final isTyping = msg['isTyping'] == true;
     final messageId = msg['id']?.toString() ?? '';
     final hasBeenAnimated = animatedMessages.contains(messageId); // چک می‌کنه که قبلاً انیمیت شده
-    
+    final bool hasImage = msg['hasImage'] == true;
     Theme.of(context);
 
     final borderRadius = BorderRadius.only(
@@ -254,7 +254,21 @@ class ChatMessageBubble extends StatelessWidget {
                               fontFamily: 'Vazirmatn',
                             ),
                           ),
-                        const SizedBox(height: 6),
+                        if (hasImage) ...[
+                           const SizedBox(height: 4),
+                           Row(
+                             children: [
+                               Icon(Icons.image, size: 16, color: isUser ? Colors.white70 : ChatColors.darkGreen),
+                               const SizedBox(width: 4),
+                               Text('تصویر همراه پیام',                // متن دلخواه
+                                   style: TextStyle(
+                                     fontSize: 12,
+                                     color: isUser ? Colors.white70 : ChatColors.darkGreen.withOpacity(0.7),
+                                   )),
+                             ],
+                           ),
+                         ],
+                         const SizedBox(height: 6),
                         // Time and status row
                         Row(
                           mainAxisSize: MainAxisSize.min,
