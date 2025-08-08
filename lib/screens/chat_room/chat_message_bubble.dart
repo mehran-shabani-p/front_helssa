@@ -1,11 +1,11 @@
 // ignore_for_file: deprecated_member_use
 
+import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter_slidable/flutter_slidable.dart';
 import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
 import 'package:intl/intl.dart';
 
-// --- رنگ‌های سبز ---
 class ChatColors {
   static const primaryGreen = Color(0xFF2E7D66);
   static const lightGreen = Color(0xFF4CAF50);
@@ -15,19 +15,19 @@ class ChatColors {
   static const backgroundGreen = Color(0xFFF1F8E9);
 }
 
-// --- ویجت تایپ انیمیشن ---
+// --- تایپر برای متن بات ---
 class TypewriterText extends StatefulWidget {
   final String text;
   final Duration duration;
   final TextStyle? style;
-  final bool shouldAnimate; // اضافه شده
+  final bool shouldAnimate;
 
   const TypewriterText({
     super.key,
     required this.text,
     this.duration = const Duration(milliseconds: 50),
     this.style,
-    this.shouldAnimate = true, // اضافه شده
+    this.shouldAnimate = true,
   });
 
   @override
@@ -43,52 +43,31 @@ class _TypewriterTextState extends State<TypewriterText>
   @override
   void initState() {
     super.initState();
-    
-    // اگر نباید انیمیت بشه، کل متن رو نشون بده
     if (!widget.shouldAnimate) {
       displayText = widget.text;
-      _controller = AnimationController(
-        duration: const Duration(milliseconds: 1),
-        vsync: this,
-      );
+      _controller = AnimationController(duration: const Duration(milliseconds: 1), vsync: this);
       return;
     }
-
     _controller = AnimationController(
       duration: Duration(milliseconds: widget.text.length * widget.duration.inMilliseconds),
       vsync: this,
     );
-
-    _animation = IntTween(
-      begin: 0,
-      end: widget.text.length,
-    ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-
+    _animation = IntTween(begin: 0, end: widget.text.length)
+        .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
     _animation.addListener(() {
-      if (mounted) {
-        setState(() {
-          displayText = widget.text.substring(0, _animation.value);
-        });
-      }
+      if (mounted) setState(() => displayText = widget.text.substring(0, _animation.value));
     });
-
     _controller.forward();
   }
 
   @override
   void didUpdateWidget(TypewriterText oldWidget) {
     super.didUpdateWidget(oldWidget);
-    
-    // اگر متن تغییر کرده و باید انیمیت بشه
     if (oldWidget.text != widget.text && widget.shouldAnimate) {
       _controller.reset();
       displayText = '';
-      
-      _animation = IntTween(
-        begin: 0,
-        end: widget.text.length,
-      ).animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
-      
+      _animation = IntTween(begin: 0, end: widget.text.length)
+          .animate(CurvedAnimation(parent: _controller, curve: Curves.easeOut));
       _controller.forward();
     } else if (!widget.shouldAnimate) {
       displayText = widget.text;
@@ -103,11 +82,7 @@ class _TypewriterTextState extends State<TypewriterText>
 
   @override
   Widget build(BuildContext context) {
-    return SelectableText(
-      displayText,
-      style: widget.style,
-      textDirection: Directionality.of(context),
-    );
+    return SelectableText(displayText, style: widget.style, textDirection: Directionality.of(context));
   }
 }
 
@@ -115,14 +90,14 @@ class ChatMessageBubble extends StatelessWidget {
   final Map<String, dynamic> msg;
   final int index;
   final VoidCallback onDelete;
-  final Set<String> animatedMessages; // اضافه شده
+  final Set<String> animatedMessages;
 
   const ChatMessageBubble({
     super.key,
     required this.msg,
     required this.index,
     required this.onDelete,
-    required this.animatedMessages, // اضافه شده
+    required this.animatedMessages,
   });
 
   String _formatTime(DateTime ts) => DateFormat('HH:mm').format(ts);
@@ -132,9 +107,10 @@ class ChatMessageBubble extends StatelessWidget {
     final isUser = msg['sender'] == 'user';
     final isTyping = msg['isTyping'] == true;
     final messageId = msg['id']?.toString() ?? '';
-    final hasBeenAnimated = animatedMessages.contains(messageId); // چک می‌کنه که قبلاً انیمیت شده
-    final bool hasImage = msg['hasImage'] == true;
-    Theme.of(context);
+    final hasBeenAnimated = animatedMessages.contains(messageId);
+
+    final List<dynamic> images = (msg['images'] ?? []) as List<dynamic>;
+    final List<String> imagesB64 = images.map((e) => e.toString()).toList();
 
     final borderRadius = BorderRadius.only(
       topLeft: const Radius.circular(18),
@@ -228,14 +204,46 @@ class ChatMessageBubble extends StatelessWidget {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Message text with typewriter effect for bot
+                        // --- تصویر کوچک داخل بابل (فقط اولین تصویر نمایش داده می‌شود)
+                        if (imagesB64.isNotEmpty) ...[
+                          Stack(
+                            children: [
+                              ClipRRect(
+                                borderRadius: BorderRadius.circular(10),
+                                child: Image.memory(
+                                  base64Decode(imagesB64.first),
+                                  width: 120,
+                                  height: 120,
+                                  fit: BoxFit.cover,
+                                ),
+                              ),
+                              if (imagesB64.length > 1)
+                                Positioned(
+                                  bottom: 6,
+                                  right: 6,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black54,
+                                      borderRadius: BorderRadius.circular(12),
+                                    ),
+                                    child: Text(
+                                      '+${imagesB64.length - 1}',
+                                      style: const TextStyle(color: Colors.white, fontSize: 12),
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
+                          const SizedBox(height: 8),
+                        ],
+
+                        // --- متن پیام
                         if (isUser || !isTyping)
                           SelectableText(
                             msg['text'] ?? '',
                             style: TextStyle(
-                              color: isUser
-                                  ? Colors.white
-                                  : ChatColors.darkGreen,
+                              color: isUser ? Colors.white : ChatColors.darkGreen,
                               fontSize: 16,
                               height: 1.45,
                               fontFamily: 'Vazirmatn',
@@ -246,7 +254,7 @@ class ChatMessageBubble extends StatelessWidget {
                           TypewriterText(
                             text: msg['text'] ?? '',
                             duration: const Duration(milliseconds: 30),
-                            shouldAnimate: !hasBeenAnimated, // فقط اگر قبلاً انیمیت نشده
+                            shouldAnimate: !hasBeenAnimated,
                             style: TextStyle(
                               color: ChatColors.darkGreen,
                               fontSize: 16,
@@ -254,22 +262,10 @@ class ChatMessageBubble extends StatelessWidget {
                               fontFamily: 'Vazirmatn',
                             ),
                           ),
-                        if (hasImage) ...[
-                           const SizedBox(height: 4),
-                           Row(
-                             children: [
-                               Icon(Icons.image, size: 16, color: isUser ? Colors.white70 : ChatColors.darkGreen),
-                               const SizedBox(width: 4),
-                               Text('تصویر همراه پیام',                // متن دلخواه
-                                   style: TextStyle(
-                                     fontSize: 12,
-                                     color: isUser ? Colors.white70 : ChatColors.darkGreen.withOpacity(0.7),
-                                   )),
-                             ],
-                           ),
-                         ],
-                         const SizedBox(height: 6),
-                        // Time and status row
+
+                        const SizedBox(height: 6),
+
+                        // --- زمان و وضعیت
                         Row(
                           mainAxisSize: MainAxisSize.min,
                           textDirection: Directionality.of(context),
@@ -277,15 +273,13 @@ class ChatMessageBubble extends StatelessWidget {
                             Text(
                               _formatTime(DateTime.parse(msg['timestamp'])),
                               style: TextStyle(
-                                color: isUser 
-                                    ? Colors.white70 
-                                    : ChatColors.primaryGreen.withOpacity(0.7),
+                                color: isUser ? Colors.white70 : ChatColors.primaryGreen.withOpacity(0.7),
                                 fontSize: 11,
                               ),
                             ),
                             if (isUser) ...[
                               const SizedBox(width: 4),
-                              Icon(Icons.done_all, size: 14, color: Colors.white70),
+                              const Icon(Icons.done_all, size: 14, color: Colors.white70),
                             ],
                           ],
                         ),
