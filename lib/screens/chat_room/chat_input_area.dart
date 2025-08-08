@@ -1,31 +1,24 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
-import 'dart:typed_data';
-
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 
-/// --- طیف سبز سازمانی
 class ChatColors {
-  static const primaryGreen     = Color(0xFF2E7D66);
-  static const lightGreen       = Color(0xFF4CAF50);
-  static const darkGreen        = Color(0xFF1B5E20);
-  static const paleGreen        = Color(0xFFE8F7E8);
-  static const softGreen        = Color(0xFF66BB6A);
-  static const backgroundGreen  = Color(0xFFF1F8E9);
+  static const primaryGreen = Color(0xFF2E7D66);
+  static const lightGreen   = Color(0xFF4CAF50);
+  static const darkGreen    = Color(0xFF1B5E20);
+  static const paleGreen    = Color(0xFFE8F7E8);
+  static const softGreen    = Color(0xFF66BB6A);
+  static const backgroundGreen = Color(0xFFF1F8E9);
 }
 
-/// ناحیهٔ ورودی چت
+/// onSend: (String text, List<String> imagesB64)
 class ChatInputArea extends StatefulWidget {
-  /// کنترل‌کنندهٔ متن
   final TextEditingController messageController;
-
-  /// فوکوس ناحیهٔ متن
   final FocusNode focusNode;
-
-  /// کال‌بک ارسال؛ نخست متن، سپس فهرست تصاویر (Base64)
   final void Function(String, List<String>) onSend;
 
   const ChatInputArea({
@@ -41,61 +34,71 @@ class ChatInputArea extends StatefulWidget {
 
 class _ChatInputAreaState extends State<ChatInputArea> {
   final ImagePicker _picker = ImagePicker();
+  final List<String> _imagesB64 = [];
 
-  /// تصاویر انتخاب‌شده به‌صورت بایت خام (به‌جای String برای کارایی بهتر)
-  final List<Uint8List> _images = [];
+  bool get hasText => widget.messageController.text.trim().isNotEmpty;
 
   @override
   void initState() {
     super.initState();
-    widget.messageController.addListener(_onInputChanged);
+    widget.messageController.addListener(() => setState(() {}));
   }
 
   @override
   void dispose() {
-    widget.messageController.removeListener(_onInputChanged);
+    widget.messageController.removeListener(() {});
     super.dispose();
   }
 
-  /* ------------------------- منطق کمکی ------------------------- */
-
-  bool get _hasText  => widget.messageController.text.trim().isNotEmpty;
-  bool get _hasMedia => _images.isNotEmpty;
-
-  void _onInputChanged() => setState(() {}); // صرفاً برای فعال/غیرفعال شدن دکمه ارسال
-
-  Future<void> _pickImage(ImageSource src) async {
-    final XFile? x = await _picker.pickImage(source: src, imageQuality: 65);
-    if (x == null) return;
-    _images.add(await x.readAsBytes());
-    setState(() {});
-  }
-
-  void _handleSend() {
-    if (!_hasText && !_hasMedia) return;        // چیزی برای ارسال نیست
-    widget.onSend(
-      widget.messageController.text.trim(),
-      _images.map(base64Encode).toList(),
+  Future<void> _pick(ImageSource src) async {
+    final XFile? f = await _picker.pickImage(
+      source: src,
+      imageQuality: 70,
+      maxWidth: 1600,
+      maxHeight: 1600,
     );
-
-    // پاک‌سازی
-    widget.messageController.clear();
-    _images.clear();
-    HapticFeedback.lightImpact();
-
-    // فوکوس دوباره روی TextField
-    widget.focusNode.requestFocus();
-    setState(() {});
+    if (f == null) return;
+    final bytes = await File(f.path).readAsBytes();
+    setState(() => _imagesB64.add(base64Encode(bytes)));
   }
 
-  /* ------------------------- ویجت ------------------------- */
+  void _handlePaste() async {
+    final data = await Clipboard.getData('text/plain');
+    final text = data?.text;
+    if (text == null || text.isEmpty) return;
+
+    final sel = widget.messageController.selection;
+    final newText = widget.messageController.text.replaceRange(sel.start, sel.end, text);
+    widget.messageController.value = widget.messageController.value.copyWith(
+      text: newText,
+      selection: TextSelection.collapsed(offset: sel.start + text.length),
+    );
+  }
+
+  void _attemptSend() {
+    final text = widget.messageController.text.trim();
+    if (text.isEmpty) {
+      // ارسال تصویر به‌تنهایی مجاز نیست
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('ارسال تصویر بدون متن مجاز نیست. لطفاً متن پیام را وارد کنید.')),
+      );
+      HapticFeedback.heavyImpact();
+      return;
+    }
+    widget.onSend(text, List.of(_imagesB64));
+    widget.messageController.clear();
+    _imagesB64.clear();
+    HapticFeedback.lightImpact();
+    setState(() {});
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      color: ChatColors.backgroundGreen,
-      padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 6),
+    return Directionality(
+      textDirection: TextDirection.rtl,
       child: Container(
+        margin: const EdgeInsets.fromLTRB(12, 10, 12, 16),
+        padding: const EdgeInsets.symmetric(vertical: 8, horizontal: 10),
         decoration: BoxDecoration(
           color: Colors.white,
           borderRadius: BorderRadius.circular(26),
@@ -111,91 +114,108 @@ class _ChatInputAreaState extends State<ChatInputArea> {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            /* ---- پیش‌نمایش تصاویر ---- */
-            if (_hasMedia)
+            // پیش‌نمایش کوچک تصاویر انتخاب‌شده (داخل همان باکس)
+            if (_imagesB64.isNotEmpty) ...[
               SizedBox(
-                height: 70,
+                height: 64,
                 child: ListView.separated(
-                  padding: const EdgeInsets.symmetric(horizontal: 12),
                   scrollDirection: Axis.horizontal,
-                  itemCount: _images.length,
+                  itemCount: _imagesB64.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
-                  itemBuilder: (_, i) => Stack(
-                    alignment: Alignment.topRight,
-                    children: [
-                      ClipRRect(
-                        borderRadius: BorderRadius.circular(10),
-                        child: Image.memory(
-                          _images[i],
-                          width: 60,
-                          height: 60,
-                          fit: BoxFit.cover,
+                  itemBuilder: (context, i) {
+                    return Stack(
+                      clipBehavior: Clip.none,
+                      children: [
+                        ClipRRect(
+                          borderRadius: BorderRadius.circular(10),
+                          child: Image.memory(
+                            base64Decode(_imagesB64[i]),
+                            width: 64,
+                            height: 64,
+                            fit: BoxFit.cover,
+                          ),
                         ),
-                      ),
-                      GestureDetector(
-                        onTap: () => setState(() => _images.removeAt(i)),
-                        child: const CircleAvatar(
-                          radius: 9,
-                          backgroundColor: Colors.black54,
-                          child: Icon(Icons.close, size: 12, color: Colors.white),
+                        Positioned(
+                          top: -6,
+                          right: -6,
+                          child: GestureDetector(
+                            onTap: () => setState(() => _imagesB64.removeAt(i)),
+                            child: Container(
+                              width: 22,
+                              height: 22,
+                              decoration: BoxDecoration(
+                                color: Colors.black54,
+                                borderRadius: BorderRadius.circular(11),
+                              ),
+                              child: const Icon(Icons.close, size: 14, color: Colors.white),
+                            ),
+                          ),
                         ),
-                      ),
-                    ],
-                  ),
+                      ],
+                    );
+                  },
                 ),
               ),
+              const SizedBox(height: 8),
+            ],
 
-            /* ---- خط ورودی متن و دکمه‌ها ---- */
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                /* الصاق فایل */
                 IconButton(
-                  icon: const Icon(Icons.attach_file),
-                  color: ChatColors.primaryGreen,
+                  tooltip: 'دوربین',
+                  icon: const Icon(Icons.camera_alt, color: ChatColors.primaryGreen),
+                  onPressed: () => _pick(ImageSource.camera),
                   splashRadius: 22,
-                  tooltip: 'پیوست',
-                  onPressed: () => _pickImage(ImageSource.gallery),
                 ),
-
-                /* فیلد متنی */
+                IconButton(
+                  tooltip: 'گالری',
+                  icon: const Icon(Icons.photo, color: ChatColors.primaryGreen),
+                  onPressed: () => _pick(ImageSource.gallery),
+                  splashRadius: 22,
+                ),
                 Expanded(
-                  child: TextField(
-                    controller: widget.messageController,
-                    focusNode: widget.focusNode,
-                    minLines: 1,
-                    maxLines: 4,
-                    textInputAction: TextInputAction.send,
-                    onSubmitted: (_) => _handleSend(),
-                    keyboardType: TextInputType.multiline,
-                    textDirection: TextDirection.rtl,
-                    decoration: InputDecoration(
-                      border: InputBorder.none,
-                      hintText: 'پیام خود را بنویسید…',
-                      hintStyle: TextStyle(
-                        color: ChatColors.primaryGreen.withOpacity(0.5),
+                  child: ConstrainedBox(
+                    constraints: const BoxConstraints(maxHeight: 120),
+                    child: Scrollbar(
+                      child: TextField(
+                        controller: widget.messageController,
+                        focusNode: widget.focusNode,
+                        minLines: 1,
+                        maxLines: 4,
+                        decoration: InputDecoration(
+                          border: InputBorder.none,
+                          hintText: 'پیام خود را بنویسید…',
+                          hintStyle: TextStyle(color: ChatColors.primaryGreen.withOpacity(0.5)),
+                          contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 8),
+                        ),
+                        style: const TextStyle(fontSize: 16, color: ChatColors.darkGreen),
+                        textInputAction: TextInputAction.send,
+                        onSubmitted: (_) => _attemptSend(),
                       ),
-                      contentPadding:
-                          const EdgeInsets.symmetric(horizontal: 8, vertical: 10),
                     ),
-                    style: const TextStyle(fontSize: 16, color: ChatColors.darkGreen),
-                    enableSuggestions: true,
-                    autocorrect: true,
                   ),
                 ),
-
-                /* دکمهٔ ارسال */
-                InkWell(
-                  onTap: _handleSend,
-                  child: Padding(
-                    padding: const EdgeInsets.all(12),
-                    child: Icon(
-                      Icons.send_rounded,
-                      size: 22,
-                      color: (_hasText || _hasMedia)
-                          ? ChatColors.primaryGreen
-                          : Colors.grey.shade300,
+                IconButton(
+                  tooltip: 'چسباندن',
+                  icon: const Icon(Icons.content_paste_go, color: ChatColors.primaryGreen),
+                  onPressed: _handlePaste,
+                  splashRadius: 22,
+                ),
+                IconButton(
+                  tooltip: 'ارسال',
+                  icon: Icon(
+                    Icons.send_rounded,
+                    color: hasText ? Colors.white : Colors.grey.shade300,
+                  ),
+                  onPressed: hasText ? _attemptSend : null,
+                  splashRadius: 22,
+                  style: ButtonStyle(
+                    backgroundColor: WidgetStatePropertyAll(
+                      hasText ? ChatColors.primaryGreen : Colors.transparent,
                     ),
+                    shape: const WidgetStatePropertyAll(CircleBorder()),
+                    padding: const WidgetStatePropertyAll(EdgeInsets.all(10)),
                   ),
                 ),
               ],
