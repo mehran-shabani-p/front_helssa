@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:convex_bottom_bar/convex_bottom_bar.dart';
+import 'package:helssa/screens/chat_room/chat_room.dart';
 
 import 'visit/visit_page.dart';
 
@@ -22,7 +23,7 @@ class _MainScreenState extends State<MainScreen>
   static final List<Widget> _widgetOptions = <Widget>[
     ContactInfo(),
     VisitPage(),
-   
+    ChatRoom(),
     Profile(),
   ];
 
@@ -47,6 +48,7 @@ class _MainScreenState extends State<MainScreen>
         items: const [
           TabItem(icon: Icons.call, title: 'تماس'),
           TabItem(icon: Icons.local_hospital, title: 'ویزیت'),
+          TabItem(icon: Icons.chat_bubble, title: 'پزشک'),
           TabItem(icon: Icons.person, title: 'پروفایل'),
         ],
       ),
