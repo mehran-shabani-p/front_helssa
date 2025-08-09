@@ -342,7 +342,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
     try {
       // آدرس جدید: baseUrl/chat/msg  (بدون /api)
-      final uri = Uri.parse('$baseUrl/chat/msg');
+      final uri = Uri.parse('$baseUrl/chat/msg/');
 
       final payload = <String, dynamic>{'message': trimmed};
       if (imagesB64.isNotEmpty) {
@@ -365,7 +365,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
 
       if (response.statusCode == 200) {
         final data = jsonDecode(utf8.decode(response.bodyBytes));
-        final botText = (data['bot_response'] ?? '').toString();
+        final botText = (data['answer'] ?? '').toString();
 
         final botMessageId = DateTime.now().toIso8601String();
         final botMessage = {
