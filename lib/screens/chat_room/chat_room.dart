@@ -359,7 +359,7 @@ class _ChatRoomState extends State<ChatRoom> with TickerProviderStateMixin {
             },
             body: jsonEncode(payload),
           )
-          .timeout(const Duration(seconds: 25));
+          .timeout(const Duration(seconds: 60));
 
       if (!mounted) return;
 
