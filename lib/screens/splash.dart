@@ -2,7 +2,6 @@
 
 import 'dart:convert';
 import 'dart:math';
-import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:google_fonts/google_fonts.dart';
