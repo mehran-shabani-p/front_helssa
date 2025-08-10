@@ -35,7 +35,7 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   /* ===== نسخهٔ فعلی اپ؛ هر ریلیز به‌روز شود ===== */
-  static const String _currentVersion = '1.0.1.2';
+  static const String _currentVersion = '1.0.1.3';
 
   /* ===== Animation ===== */
   late final AnimationController _ctl;
