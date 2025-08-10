@@ -8,7 +8,7 @@ import '../../constants.dart';
 /// سرویس واحد برای ارسال ویزیت و گرفتن پزشک آن‌کال
 class VisitService {
   /* ثابت‌های داخلی */
-  static const _baseUrl      = '$baseUrl/api/visit';
+  static const _baseUrl      = '$baseUrl';
   static const _fixedUrgency = 'prescription';
   static const _fixedSymptom = 'fever';
 

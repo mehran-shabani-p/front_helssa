@@ -1,10 +1,10 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
-import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:universal_html/html.dart' as html;
 
 class ChatColors {
   static const primaryGreen = Color(0xFF2E7D66);
@@ -35,6 +35,7 @@ class ChatInputArea extends StatefulWidget {
 class _ChatInputAreaState extends State<ChatInputArea> {
   final ImagePicker _picker = ImagePicker();
   final List<String> _imagesB64 = [];
+  final List<Uint8List> _imagesBytes = [];
 
   bool get hasText => widget.messageController.text.trim().isNotEmpty;
 
@@ -51,15 +52,52 @@ class _ChatInputAreaState extends State<ChatInputArea> {
   }
 
   Future<void> _pick(ImageSource src) async {
-    final XFile? f = await _picker.pickImage(
-      source: src,
-      imageQuality: 70,
-      maxWidth: 1600,
-      maxHeight: 1600,
-    );
-    if (f == null) return;
-    final bytes = await File(f.path).readAsBytes();
-    setState(() => _imagesB64.add(base64Encode(bytes)));
+    try {
+      final XFile? f = await _picker.pickImage(
+        source: src,
+        imageQuality: 70,
+        maxWidth: 1600,
+        maxHeight: 1600,
+      );
+      if (f == null) return;
+      
+      // برای وب، ما باید از readAsBytes استفاده کنیم
+      final bytes = await f.readAsBytes();
+      setState(() {
+        _imagesBytes.add(bytes);
+        _imagesB64.add(base64Encode(bytes));
+      });
+    } catch (e) {
+      debugPrint('Error picking image: $e');
+      // نمایش خطا به کاربر
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('خطا در انتخاب تصویر: $e')),
+        );
+      }
+    }
+  }
+  
+  // برای وب، ما از یک روش مخصوص برای آپلود فایل استفاده می‌کنیم
+  Future<void> _pickFileForWeb() async {
+    final html.FileUploadInputElement input = html.FileUploadInputElement()..accept = 'image/*';
+    input.click();
+    
+    await input.onChange.first;
+    if (input.files?.isEmpty ?? true) return;
+    
+    final reader = html.FileReader();
+    reader.readAsArrayBuffer(input.files![0]);
+    await reader.onLoad.first;
+    
+    final result = reader.result as dynamic;
+    if (result == null) return;
+    
+    final bytes = Uint8List.fromList(result);
+    setState(() {
+      _imagesBytes.add(bytes);
+      _imagesB64.add(base64Encode(bytes));
+    });
   }
 
   void _handlePaste() async {
@@ -87,9 +125,11 @@ class _ChatInputAreaState extends State<ChatInputArea> {
     }
     widget.onSend(text, List.of(_imagesB64));
     widget.messageController.clear();
-    _imagesB64.clear();
+    setState(() {
+      _imagesB64.clear();
+      _imagesBytes.clear();
+    });
     HapticFeedback.lightImpact();
-    setState(() {});
   }
 
   @override
@@ -115,12 +155,12 @@ class _ChatInputAreaState extends State<ChatInputArea> {
           mainAxisSize: MainAxisSize.min,
           children: [
             // پیش‌نمایش کوچک تصاویر انتخاب‌شده (داخل همان باکس)
-            if (_imagesB64.isNotEmpty) ...[
+            if (_imagesBytes.isNotEmpty) ...[
               SizedBox(
                 height: 64,
                 child: ListView.separated(
                   scrollDirection: Axis.horizontal,
-                  itemCount: _imagesB64.length,
+                  itemCount: _imagesBytes.length,
                   separatorBuilder: (_, __) => const SizedBox(width: 8),
                   itemBuilder: (context, i) {
                     return Stack(
@@ -129,7 +169,7 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                         ClipRRect(
                           borderRadius: BorderRadius.circular(10),
                           child: Image.memory(
-                            base64Decode(_imagesB64[i]),
+                            _imagesBytes[i],
                             width: 64,
                             height: 64,
                             fit: BoxFit.cover,
@@ -139,7 +179,10 @@ class _ChatInputAreaState extends State<ChatInputArea> {
                           top: -6,
                           right: -6,
                           child: GestureDetector(
-                            onTap: () => setState(() => _imagesB64.removeAt(i)),
+                            onTap: () => setState(() {
+                              _imagesBytes.removeAt(i);
+                              _imagesB64.removeAt(i);
+                            }),
                             child: Container(
                               width: 22,
                               height: 22,
@@ -163,15 +206,16 @@ class _ChatInputAreaState extends State<ChatInputArea> {
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 IconButton(
+                  tooltip: 'آپلود تصویر',
+                  icon: const Icon(Icons.photo, color: ChatColors.primaryGreen),
+                  onPressed: _pickFileForWeb, // استفاده از متد مخصوص وب
+                  splashRadius: 22,
+                ),
+                // در وب امکان استفاده مستقیم از دوربین محدود است
+                IconButton(
                   tooltip: 'دوربین',
                   icon: const Icon(Icons.camera_alt, color: ChatColors.primaryGreen),
                   onPressed: () => _pick(ImageSource.camera),
-                  splashRadius: 22,
-                ),
-                IconButton(
-                  tooltip: 'گالری',
-                  icon: const Icon(Icons.photo, color: ChatColors.primaryGreen),
-                  onPressed: () => _pick(ImageSource.gallery),
                   splashRadius: 22,
                 ),
                 Expanded(

@@ -47,8 +47,8 @@ Future<void> _fetchBalance() async {
     final token = prefs.getString('access_token') ?? '';
     if (token.isEmpty) throw Exception('no token');
 
-    final res = await http.get(
-      Uri.parse('https://api.medogram.ir/api/box'),
+    final res = await http.post(
+      Uri.parse('https://api.medogram.ir/api/box/'),
       headers: {'Authorization': 'Bearer $token'},
     ).timeout(const Duration(seconds: 6));
 

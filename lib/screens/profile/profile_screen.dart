@@ -3,10 +3,12 @@
 import 'package:flutter/material.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../utils/avatar_manager.dart';
+import 'package:flutter/services.dart';
 import '../../utils/snackbar.dart';
 import 'profile_avatar.dart';
 import 'profile_payment.dart';
 import 'profile_service.dart';
+import 'profile_subscription.dart';
 
 class Profile extends StatefulWidget {
   const Profile({super.key});
@@ -29,6 +31,15 @@ class _ProfileState extends State<Profile> {
   final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   bool isWalletRefreshActive = false;
+  final _referralController = TextEditingController();
+  bool _isSubmitting = false;
+  String? _errorMessage;
+  bool _isSuccess = false;
+  final _oneKey = GlobalKey<FormState>();
+  
+  
+
+  
 
   // رنگ‌های سبز مطابق با ویزیت پیج
   final _primaryColor = const Color(0xFF2E7D66);     // سبز دریایی
@@ -43,6 +54,7 @@ class _ProfileState extends State<Profile> {
     super.initState();
     _initializeProfile();
   }
+
 
   Future<void> _initializeProfile() async {
     await _initAvatarManager();
@@ -86,6 +98,66 @@ class _ProfileState extends State<Profile> {
     if (username.isNotEmpty && !avatarManager.isCurrentAvatarForUsername(username)) {
       await avatarManager.generateAvatarFromUsername(username);
       setState(() {});
+    }
+  }
+
+   Future<void> _submitReferralCode() async {
+    if (!_formKey.currentState!.validate()) return;
+
+    setState(() {
+      _isSubmitting = true;
+      _errorMessage = null;
+      _isSuccess = false;
+    });
+
+    try {
+      final result = await ProfileService.submitReferralCode(_referralController.text);
+
+      if (result['success']) {
+        setState(() {
+          _isSuccess = true;
+          _errorMessage = null;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(result['message']),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      } else {
+        setState(() {
+          _errorMessage = result['error'];
+          _isSuccess = false;
+        });
+        
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(_errorMessage ?? 'خطا در ثبت کد معرف'),
+            backgroundColor: Colors.red,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'خطا در ثبت کد معرف: ${e.toString()}';
+        _isSuccess = false;
+      });
+      
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(_errorMessage!),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+    } finally {
+      setState(() => _isSubmitting = false);
     }
   }
 
@@ -257,8 +329,194 @@ class _ProfileState extends State<Profile> {
           const SizedBox(height: 20),
           _buildActionButtons(),
           const SizedBox(height: 20),
+          _buildProfileReferral(),
+          const SizedBox(height: 20),
           _buildPaymentCard(),
+          const SizedBox(height: 20),
+          _buildSubscriptionCard(),
           const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+
+
+  Widget _buildSubscriptionCard() {
+  return Container(
+    decoration: BoxDecoration(
+      color: Colors.white,
+      borderRadius: BorderRadius.circular(20),
+      border: Border.all(color: _lightGreen.withOpacity(0.2)),
+      boxShadow: [
+        BoxShadow(
+          color: _primaryColor.withOpacity(0.08),
+          blurRadius: 12,
+          offset: const Offset(0, 6),
+        ),
+      ],
+    ),
+    child: Padding(
+      padding: const EdgeInsets.all(20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Row(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(10),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(colors: [_primaryColor, _softGreen]),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: const Icon(Icons.card_membership, color: Colors.white, size: 20),
+              ),
+              const SizedBox(width: 12),
+              Text(
+                'اشتراک‌ها',
+                style: TextStyle(
+                  fontSize: 18,
+                  fontWeight: FontWeight.bold,
+                  color: _darkGreen,
+                ),
+              ),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ProfileSubscription(
+            isLoading: isLoading,
+            onRefresh: () => _loadProfileData(),
+          ),
+        ],
+      ),
+    ),
+  );
+}
+
+   Widget _buildProfileReferral(
+   ) {
+    final primaryColor = const Color(0xFF2E7D66);
+    final lightGreen = const Color(0xFF4CAF50);
+    final paleGreen = const Color(0xFFE8F7E8);
+      
+    return Form(
+      key: _oneKey,
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (_isSuccess) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: paleGreen,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: lightGreen),
+              ),
+              child: Row(
+                children: [
+                  Icon(Icons.check_circle, color: lightGreen),
+                  const SizedBox(width: 8),
+                  const Expanded(
+                    child: Text(
+                      'کد معرف با موفقیت ثبت شد',
+                      style: TextStyle(color: Colors.black87),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          if (_errorMessage != null && !_isSuccess) ...[
+            Container(
+              padding: const EdgeInsets.all(12),
+              decoration: BoxDecoration(
+                color: Colors.red.shade50,
+                borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.red.shade300),
+              ),
+              child: Row(
+                children: [
+                  const Icon(Icons.error, color: Colors.red),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      _errorMessage!,
+                      style: const TextStyle(color: Colors.red),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+            const SizedBox(height: 16),
+          ],
+          
+          TextFormField(
+            controller: _referralController,
+            decoration: InputDecoration(
+              labelText: 'کد معرف (شماره موبایل)',
+              hintText: '09123456789',
+              prefixIcon: Icon(Icons.phone_android, color: primaryColor),
+              border: OutlineInputBorder(borderRadius: BorderRadius.circular(16)),
+              enabledBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: lightGreen.withOpacity(0.5)),
+              ),
+              focusedBorder: OutlineInputBorder(
+                borderRadius: BorderRadius.circular(16),
+                borderSide: BorderSide(color: primaryColor, width: 2),
+              ),
+              filled: true,
+              fillColor: paleGreen.withOpacity(0.2),
+            ),
+            keyboardType: TextInputType.phone,
+            inputFormatters: [
+              FilteringTextInputFormatter.digitsOnly,
+              LengthLimitingTextInputFormatter(11),
+            ],
+            validator: (value) {
+              if (value == null || value.isEmpty) {
+                return 'لطفاً شماره موبایل را وارد کنید';
+              }
+              if (value.length != 11) {
+                return 'شماره موبایل باید 11 رقم باشد';
+              }
+              if (!value.startsWith('09')) {
+                return 'شماره موبایل باید با 09 شروع شود';
+              }
+              return null;
+            },
+          ),
+          
+          const SizedBox(height: 16),
+          
+          Align(
+            alignment: Alignment.center,
+            child: ElevatedButton.icon(
+              onPressed: (_isSubmitting || _isSuccess)
+                  ? null
+                  : _submitReferralCode,
+              icon: _isSubmitting
+                  ? Container(
+                      width: 24,
+                      height: 24,
+                      padding: const EdgeInsets.all(2.0),
+                      child: const CircularProgressIndicator(
+                        color: Colors.white,
+                        strokeWidth: 3,
+                      ),
+                    )
+                  : const Icon(Icons.send),
+              label: Text(_isSuccess ? 'ثبت شد' : 'ثبت کد معرف'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: primaryColor,
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+              ),
+            ),
+          ),
         ],
       ),
     );
@@ -730,6 +988,7 @@ class _ProfileState extends State<Profile> {
     _usernameController.dispose();
     _emailController.dispose();
     selectedAmount.dispose();
+    _referralController.dispose();
     super.dispose();
   }
 }

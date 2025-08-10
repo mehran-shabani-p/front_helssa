@@ -12,7 +12,7 @@ ProfileService - مدیریت عملیات پروفایل و کیف پول
 
 class ProfileService {
 
-  static const String _baseUrl = '$baseUrl/api';
+  static const String _baseUrl = '$baseUrl';
 
   /* ========================================================================
   دریافت توکن دسترسی
@@ -45,11 +45,11 @@ class ProfileService {
       
       final responses = await Future.wait([
         http.post(
-          Uri.parse('$_baseUrl/profile/'),
+          Uri.parse('$_baseUrl/api/profile/'),
           headers: headers,
         ),
         http.post(
-          Uri.parse('$_baseUrl/box/'),
+          Uri.parse('$_baseUrl/api/box/'),
           headers: headers,
         ),
       ]);
@@ -89,7 +89,7 @@ class ProfileService {
       final headers = await _getHeaders();
       
       final response = await http.post(
-        Uri.parse('$_baseUrl/profile/update/'),
+        Uri.parse('$_baseUrl/api/profile/update/'),
         headers: headers,
         body: jsonEncode({
           'username': username,
@@ -130,7 +130,7 @@ class ProfileService {
       final headers = await _getHeaders();
       
       final response = await http.post(
-        Uri.parse('$_baseUrl/transaction/'),
+        Uri.parse('$_baseUrl/api/transaction/'),
         headers: headers,
         body: jsonEncode({'amount': amount}),
       );
@@ -189,7 +189,7 @@ class ProfileService {
       final headers = await _getHeaders();
       
       final response = await http.get(
-        Uri.parse('$_baseUrl/profile/'),
+        Uri.parse('$_baseUrl/api/profile/'),
         headers: headers,
       );
 
@@ -221,7 +221,7 @@ class ProfileService {
       final headers = await _getHeaders();
       
       final response = await http.get(
-        Uri.parse('$_baseUrl/box/'),
+        Uri.parse('$_baseUrl/api/box/'),
         headers: headers,
       );
 
@@ -254,7 +254,7 @@ class ProfileService {
       final headers = await _getHeaders();
       
       final response = await http.get(
-        Uri.parse('$_baseUrl/transactions/'),
+        Uri.parse('$_baseUrl/api/transactions/'),
         headers: headers,
       );
 
@@ -286,7 +286,7 @@ class ProfileService {
       final headers = await _getHeaders();
       
       final response = await http.delete(
-        Uri.parse('$_baseUrl/profile/delete/'),
+        Uri.parse('$_baseUrl/api/profile/delete/'),
         headers: headers,
       );
 
@@ -318,7 +318,7 @@ class ProfileService {
       final headers = await _getHeaders();
       
       final response = await http.post(
-        Uri.parse('$_baseUrl/transaction/verify/'),
+        Uri.parse('$_baseUrl/api/transaction/verify/'),
         headers: headers,
         body: jsonEncode({'transaction_id': transactionId}),
       );
@@ -376,4 +376,136 @@ class ProfileService {
       };
     }
   }
+
+  /* ========================================================================
+دریافت لیست پلن‌های اشتراک
+======================================================================== */
+
+static Future<Map<String, dynamic>> fetchSubscriptionPlans() async {
+  try {
+    final response = await http.get(
+      Uri.parse('$_baseUrl/sub/plans/'),
+    );
+
+    if (response.statusCode == 200) {
+      final List<dynamic> plans = json.decode(response.body);
+      // فیلتر کردن پلن starter
+      final filteredPlans = plans.where((plan) => plan['name'] != 'starter').toList();
+      
+      return {
+        'success': true,
+        'plans': filteredPlans,
+      };
+    } else {
+      return {
+        'success': false,
+        'error': 'خطا در دریافت لیست پلن‌ها',
+      };
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'error': 'خطا در ارتباط با سرور: ${e.toString()}',
+    };
+  }
 }
+
+/* ========================================================================
+دریافت اشتراک فعلی کاربر
+======================================================================== */
+
+static Future<Map<String, dynamic>> fetchUserSubscription() async {
+  try {
+    final headers = await _getHeaders();
+
+    final response = await http.get(
+      Uri.parse('$_baseUrl/sub/my-subscription/'),
+      headers: headers,
+    );
+
+    if (response.statusCode == 200) {
+      return {
+        'success': true,
+        'subscription': json.decode(response.body),
+      };
+    } else if (response.statusCode == 404) {
+      return {
+        'success': true,
+        'subscription': null, // کاربر اشتراک فعالی ندارد
+      };
+    } else {
+      return {
+        'success': false,
+        'error': 'خطا در دریافت اطلاعات اشتراک',
+      };
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'error': 'خطا در ارتباط با سرور: ${e.toString()}',
+    };
+  }
+}
+
+/* ========================================================================
+خرید اشتراک جدید
+======================================================================== */
+
+static Future<Map<String, dynamic>> buySubscription(int planId) async {
+  try {
+    final headers = await _getHeaders();
+
+    final response = await http.post(
+      Uri.parse('$_baseUrl/sub/buy/'),
+      headers: headers,
+      body: jsonEncode({'plan_id': planId}),
+    );
+
+    if (response.statusCode == 200 || response.statusCode == 201) {
+      return {
+        'success': true,
+        'subscription': json.decode(response.body),
+      };
+    } else {
+      final error = json.decode(response.body);
+      return {
+        'success': false,
+        'error': error['detail'] ?? 'خطا در خرید اشتراک',
+      };
+    }
+  } catch (e) {
+    return {
+      'success': false,
+      'error': 'خطا در ارتباط با سرور: ${e.toString()}',
+    };
+  }
+}
+
+
+    static Future<Map<String, dynamic>> submitReferralCode(String phoneNumber) async {
+      try {
+        final headers = await _getHeaders();
+        final response = await http.post(
+          Uri.parse('$_baseUrl/api/intcode/'),
+          headers: headers,
+          body: jsonEncode({'phone': phoneNumber}),
+          );
+          if (response.statusCode == 200 || response.statusCode == 201) {
+            return {
+              'success': true,
+              'message': 'کد معرف با موفقیت ثبت شد',
+            };
+            } else {
+              final error = json.decode(response.body);
+              return {
+                'success': false,
+                'error': error['detail'] ?? 'خطا در ثبت کد معرف',
+                };}
+                } catch (e) {
+                  return {
+                    'success': false,
+                    'error': 'خطا در ارتباط با سرور: ${e.toString()}'
+                    };
+                    }
+                    }
+                    }
