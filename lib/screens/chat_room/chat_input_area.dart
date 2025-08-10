@@ -1,6 +1,9 @@
 // ignore_for_file: deprecated_member_use
 
 import 'dart:convert';
+import 'dart:io' as io;
+import 'dart:typed_data';
+import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
@@ -51,25 +54,36 @@ class _ChatInputAreaState extends State<ChatInputArea> {
     super.dispose();
   }
 
-  Future<void> _pick(ImageSource src) async {
+  Future<void> _pickImage(ImageSource src) async {
     try {
+      if (kIsWeb && src == ImageSource.camera) {
+        // در وب، اگر دوربین درخواست شده، از متد وب استفاده می‌کنیم
+        await _pickFileForWeb();
+        return;
+      }
+      
       final XFile? f = await _picker.pickImage(
         source: src,
         imageQuality: 70,
         maxWidth: 1600,
         maxHeight: 1600,
       );
+      
       if (f == null) return;
       
-      // برای وب، ما باید از readAsBytes استفاده کنیم
-      final bytes = await f.readAsBytes();
+      Uint8List bytes;
+      if (kIsWeb) {
+        bytes = await f.readAsBytes();
+      } else {
+        bytes = await io.File(f.path).readAsBytes();
+      }
+      
       setState(() {
         _imagesBytes.add(bytes);
         _imagesB64.add(base64Encode(bytes));
       });
     } catch (e) {
       debugPrint('Error picking image: $e');
-      // نمایش خطا به کاربر
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('خطا در انتخاب تصویر: $e')),
@@ -78,8 +92,10 @@ class _ChatInputAreaState extends State<ChatInputArea> {
     }
   }
   
-  // برای وب، ما از یک روش مخصوص برای آپلود فایل استفاده می‌کنیم
+  // متد مخصوص وب
   Future<void> _pickFileForWeb() async {
+    if (!kIsWeb) return;
+    
     final html.FileUploadInputElement input = html.FileUploadInputElement()..accept = 'image/*';
     input.click();
     
@@ -205,17 +221,18 @@ class _ChatInputAreaState extends State<ChatInputArea> {
             Row(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                IconButton(
-                  tooltip: 'آپلود تصویر',
-                  icon: const Icon(Icons.photo, color: ChatColors.primaryGreen),
-                  onPressed: _pickFileForWeb, // استفاده از متد مخصوص وب
-                  splashRadius: 22,
-                ),
-                // در وب امکان استفاده مستقیم از دوربین محدود است
+                // دکمه دوربین برای هر دو پلتفرم
                 IconButton(
                   tooltip: 'دوربین',
                   icon: const Icon(Icons.camera_alt, color: ChatColors.primaryGreen),
-                  onPressed: () => _pick(ImageSource.camera),
+                  onPressed: () => _pickImage(ImageSource.camera),
+                  splashRadius: 22,
+                ),
+                // دکمه گالری برای هر دو پلتفرم
+                IconButton(
+                  tooltip: 'گالری',
+                  icon: const Icon(Icons.photo, color: ChatColors.primaryGreen),
+                  onPressed: () => _pickImage(ImageSource.gallery),
                   splashRadius: 22,
                 ),
                 Expanded(

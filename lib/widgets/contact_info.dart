@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:font_awesome_flutter/font_awesome_flutter.dart';
 import 'contact_service.dart';
+import '../constants.dart';
 
 /* ============================================================================
 صفحهٔ ContactInfo بهبود یافته برای وب و موبایل با طراحی کامل
@@ -264,7 +265,7 @@ class ContactInfo extends StatelessWidget {
           Divider(color: Colors.white.withOpacity(0.2)),
           const SizedBox(height: 8),
           Text(
-            'نسخه ${ContactService.currentVersion}',
+            'نسخه ${currentVersion}',
             style: TextStyle(
               color: Colors.white.withOpacity(0.7),
               fontSize: 12,

@@ -35,8 +35,8 @@ class SplashScreen extends StatefulWidget {
 class _SplashScreenState extends State<SplashScreen>
     with SingleTickerProviderStateMixin {
   /* ===== نسخهٔ فعلی اپ؛ هر ریلیز به‌روز شود ===== */
-  static const String _currentVersion = '1.0.1.3';
-
+  
+   
   /* ===== Animation ===== */
   late final AnimationController _ctl;
 
@@ -45,6 +45,7 @@ class _SplashScreenState extends State<SplashScreen>
   static const _dlUrl  = '$baseUrl/api/download-apk/';
   static const _timeout = Duration(seconds: 3);
   static const _minSplash = Duration(seconds: 3);
+  static const _currentVersion = currentVersion;
 
   /* ===== State ===== */
   bool _navigated = false;

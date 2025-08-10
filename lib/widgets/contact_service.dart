@@ -15,7 +15,7 @@ class ContactColors {
 }
 
 class ContactService {
-  static const String currentVersion = '1.0.1.1';
+  
   
   /* ============================================================================
   تابع دانلود APK اندروید با Loading State
