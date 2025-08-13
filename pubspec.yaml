@@ -1,54 +1,38 @@
-name: helssa
-description: "AI and Online Clinic"
-
-publish_to: 'none' 
-
-version: 1.1.2+1
+name: helssa_app
+description: Helssa – Flutter Web & Android app with Chat, SEO, and modular architecture.
+publish_to: "none"
 
 environment:
-  sdk: ^3.8.1
+  sdk: ">=3.1.0 <4.0.0"
 
 dependencies:
   flutter:
     sdk: flutter
 
-  cupertino_icons: ^1.0.8
-  http: ^1.4.0
-  shared_preferences: ^2.5.3
-  intl: ^0.20.2
-  animated_text_kit: ^4.2.3
-  flutter_chat_bubble: ^2.0.2
-  flutter_slidable: ^4.0.0
-  share_plus: ^11.0.0
-  flutter_staggered_animations: ^1.1.1
-  loading_animation_widget: ^1.3.0
-  glassmorphism: ^3.0.0
-  bottom_navy_bar: ^6.1.0
-  provider: ^6.1.5
-  url_launcher: ^6.3.2
-  flutter_animate: ^4.5.2
-  lottie: ^3.3.1
-  google_fonts: ^6.2.1
-  shimmer: ^3.0.0
-  flutter_screenutil: ^5.9.3
-  font_awesome_flutter: ^10.8.0
-  webview_flutter: ^4.13.0
-  cached_network_image: ^3.4.1
-  convex_bottom_bar: ^3.2.0
-  emoji_picker_flutter: ^4.3.0
-  file_picker: ^10.2.0
-  image_picker: ^1.1.2
+  # Routing + SEO (web)
+  go_router: ^14.2.7
   universal_html: ^2.2.4
+
+  # Theming & Fonts
+  google_fonts: ^6.2.1
+
+  # Storage / HTTP / Launchers
+  shared_preferences: ^2.3.2
+  http: ^1.2.2
+  url_launcher: ^6.3.2
+  share_plus: ^10.0.2
+
+  # Media + Files + OCR + PDF text
+  image_picker: ^1.1.2
+  file_picker: ^10.2.0
+  image: ^4.2.0
+  google_mlkit_text_recognition: ^0.13.0
+  pdf_text: ^1.0.0
+
+dev_dependencies:
+  flutter_lints: ^4.0.0
   flutter_test:
     sdk: flutter
-  flutter_lints: ^6.0.0
-  mime: ^2.0.0
-
 
 flutter:
-
   uses-material-design: true
-
-assets:
-    - assets/imgs/logo192.png
-    - assets/loading.json
