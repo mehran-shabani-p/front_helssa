@@ -1,5 +1,6 @@
 name: helssa_app
 description: Helssa – Flutter Web & Android app with Chat, SEO, and modular architecture.
+version: 0.1.0+0
 publish_to: "none"
 
 environment:
@@ -18,7 +19,7 @@ dependencies:
 
   # Storage / HTTP / Launchers
   shared_preferences: ^2.3.2
-  http: ^1.2.2
+  http: ^0.13.0
   url_launcher: ^6.3.2
   share_plus: ^10.0.2
 
@@ -27,7 +28,7 @@ dependencies:
   file_picker: ^10.2.0
   image: ^4.2.0
   google_mlkit_text_recognition: ^0.13.0
-  pdf_text: ^1.0.0
+  pdf_text: ^0.5.0
 
 dev_dependencies:
   flutter_lints: ^4.0.0

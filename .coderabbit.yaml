@@ -1,0 +1,11 @@
+# yaml-language-server: $schema: https://coderabbit.ai/integrations/schema.v2.json
+reviews:
+  enabled: true
+  review_status: true
+  base_branches: ["*"]
+  event_triggers:
+    pr_opened: true
+    pr_synchronized: true
+    comment_command: true
+summary:
+  enabled: true

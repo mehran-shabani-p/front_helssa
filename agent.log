@@ -1,0 +1,3 @@
+2025-08-13T21:39:17Z | agent=assistant | action=plan | ref=work | note=bootstrap repository scaffolding
+2025-08-13T21:39:54Z | agent=assistant | action=impl | ref=work | note=add repository scaffolding files
+2025-08-13T21:40:00Z | agent=assistant | action=test | ref=work | note=flutter not installed for tests
