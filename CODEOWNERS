@@ -1,5 +1,5 @@
 # Code ownership rules
-*       @example-owner
-app/    @example-owner
-core/   @example-owner
-features/ @example-owner
+*       @mehran-shabani
+app/    @mehran-shabani
+core/   @mehran-shabani
+features/ @mehran-shabani
