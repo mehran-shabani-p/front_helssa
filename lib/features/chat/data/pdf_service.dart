@@ -1,14 +1,17 @@
 import 'dart:typed_data';
-import 'package:pdf_text/pdf_text.dart';
+import 'package:syncfusion_flutter_pdf/pdf.dart';
 
 class PdfService {
   Future<String> extract(Uint8List pdfBytes) async {
-    final doc = await PDFDocument.fromData(pdfBytes);
-    final pages = doc.pagesCount;
+    final doc = PdfDocument(inputBytes: pdfBytes);
+    final extractor = PdfTextExtractor(doc);
     final buf = StringBuffer();
-    for (int i = 1; i <= pages; i++) {
-      buf.writeln(await doc.pageAt(i).text);
+
+    for (var i = 0; i < doc.pages.count; i++) {
+      buf.writeln(extractor.extractText(startPageIndex: i, endPageIndex: i));
     }
+
+    doc.dispose();
     return buf.toString().trim();
   }
 }
