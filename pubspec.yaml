@@ -11,7 +11,7 @@ dependencies:
     sdk: flutter
 
   cupertino_icons: ^1.0.8
-  http: ^0.13.0
+  http: ^1.2.2         # ← ارتقا برای سازگاری با lottie 3.x
   shared_preferences: ^2.5.3
   intl: ^0.20.2
   animated_text_kit: ^4.2.3
@@ -41,31 +41,12 @@ dependencies:
   image: ^4.2.0
   google_mlkit_text_recognition: ^0.13.0
   pdf_text: ^0.5.0
+  mime: ^2.0.0
 
-
-
-  
+dev_dependencies:
   flutter_test:
     sdk: flutter
   flutter_lints: ^6.0.0
-  mime: ^2.0.0
-
-
-  
-
-  
-
-  
-  
-
-  
-  
-  
-
-
-  
-  
-  
 
 flutter:
   uses-material-design: true
