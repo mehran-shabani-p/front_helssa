@@ -1,0 +1,10 @@
+checklists:
+  - name: Security
+    items:
+      - No secrets in source
+      - Validate all external inputs
+      - HTTPS-only endpoints
+  - name: Performance
+    items:
+      - Avoid unnecessary rebuilds
+      - Use const widgets where possible

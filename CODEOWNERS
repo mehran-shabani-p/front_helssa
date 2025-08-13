@@ -1,0 +1,5 @@
+# Code ownership rules
+*       @example-owner
+app/    @example-owner
+core/   @example-owner
+features/ @example-owner
