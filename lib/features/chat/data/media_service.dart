@@ -12,7 +12,7 @@ class MediaService {
     if (kIsWeb && src == ImageSource.camera) {
       final input = html.FileUploadInputElement()
         ..accept = 'image/*'
-        ..capture = 'environment';
+        ..setAttribute('capture', 'environment');
       input.click();
       await input.onChange.first;
       if (input.files == null || input.files!.isEmpty) return null;
