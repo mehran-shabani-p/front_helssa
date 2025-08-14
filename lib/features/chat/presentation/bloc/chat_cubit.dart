@@ -103,7 +103,6 @@ class ChatCubit extends Cubit<ChatState> {
   }
 
   Future<void> send(String text, {List<String> imagesB64 = const [], String? pdfText}) async {
-    final act = state.sessions.firstWhere((s) => s.id == state.activeId, orElse: () => state.sessions.first);
     var messageText = text;
     var images = imagesB64;
 

@@ -57,11 +57,9 @@ class _ChatPageState extends State<ChatPage> {
             builder: (context, state) {
               return IconButton(
                 onPressed: () {
-                  final active = state.sessions.firstWhere(
-                    (s) => s.id == state.activeId,
-                    orElse: () => state.sessions.isNotEmpty ? state.sessions.first : null,
-                  );
+                  final active = context.read<ChatCubit>().state.active;
                   if (active == null || active.messages.isEmpty) return;
+                  if (active.messages.isEmpty) return;
                   final text = active.messages
                       .map((m) => '${m.sender}: ${m.text}${m.imagesB64.isNotEmpty ? ' [تصویر]' : ''}')
                       .join('\n');
@@ -142,8 +140,4 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-}
-
-extension on String {
-  String take(int n) => length <= n ? this : substring(0, n);
 }
