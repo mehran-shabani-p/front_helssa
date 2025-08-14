@@ -8,7 +8,8 @@ class VisitService {
 
   Future<List<Map<String, dynamic>>> listVisits(String token) async {
     final uri = Uri.parse('$baseUrl/visit/');
-    final r = await _client.get(uri, headers: {'Authorization': 'Bearer $token'});
+    final r =
+        await _client.get(uri, headers: {'Authorization': 'Bearer $token'});
     if (r.statusCode != 200) {
       throw Exception('Visit list failed: ${r.statusCode}');
     }
@@ -32,9 +33,11 @@ class VisitService {
     }
   }
 
-  Future<List<Map<String, dynamic>>> previousPrescriptions(String token, String nationalCode) async {
+  Future<List<Map<String, dynamic>>> previousPrescriptions(
+      String token, String nationalCode) async {
     final uri = Uri.parse('$baseUrl/order/download/$nationalCode/');
-    final r = await _client.get(uri, headers: {'Authorization': 'Bearer $token'});
+    final r =
+        await _client.get(uri, headers: {'Authorization': 'Bearer $token'});
     if (r.statusCode != 200) {
       throw Exception('Prescriptions failed: ${r.statusCode}');
     }

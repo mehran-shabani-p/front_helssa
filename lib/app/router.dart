@@ -35,7 +35,8 @@ final appRouter = GoRouter(
           pageBuilder: (c, s) {
             SeoMeta.set(
               title: 'هلسا | پزشک آنلاین و گواهی استعلاجی',
-              description: 'ویزیت آنلاین، نسخه الکترونیک و پزشک هوش مصنوعی ۲۴ ساعته.',
+              description:
+                  'ویزیت آنلاین، نسخه الکترونیک و پزشک هوش مصنوعی ۲۴ ساعته.',
               path: s.uri.toString(),
             );
             return const NoTransitionPage(child: _Home());
@@ -45,7 +46,10 @@ final appRouter = GoRouter(
           path: '/login',
           name: 'login',
           builder: (_, s) {
-            SeoMeta.set(title: 'ورود | هلسا', description: 'ورود با شماره موبایل و کد تأیید.', path: s.uri.toString());
+            SeoMeta.set(
+                title: 'ورود | هلسا',
+                description: 'ورود با شماره موبایل و کد تأیید.',
+                path: s.uri.toString());
             return const LoginPage();
           },
         ),
@@ -53,7 +57,10 @@ final appRouter = GoRouter(
           path: '/profile',
           name: 'profile',
           builder: (_, s) {
-            SeoMeta.set(title: 'پروفایل | هلسا', description: 'مدیریت حساب و اطلاعات فردی.', path: s.uri.toString());
+            SeoMeta.set(
+                title: 'پروفایل | هلسا',
+                description: 'مدیریت حساب و اطلاعات فردی.',
+                path: s.uri.toString());
             return const ProfileScreen();
           },
         ),
@@ -61,7 +68,10 @@ final appRouter = GoRouter(
           path: '/visits',
           name: 'visits',
           builder: (_, s) {
-            SeoMeta.set(title: 'ویزیت آنلاین | هلسا', description: 'درخواست و پیگیری ویزیت.', path: s.uri.toString());
+            SeoMeta.set(
+                title: 'ویزیت آنلاین | هلسا',
+                description: 'درخواست و پیگیری ویزیت.',
+                path: s.uri.toString());
             return const VisitPage();
           },
         ),
@@ -69,7 +79,10 @@ final appRouter = GoRouter(
           path: '/visits/special',
           name: 'special_visit',
           builder: (_, s) {
-            SeoMeta.set(title: 'ویزیت ویژه | هلسا', description: 'خدمات ویژه‌ی پزشکی.', path: s.uri.toString());
+            SeoMeta.set(
+                title: 'ویزیت ویژه | هلسا',
+                description: 'خدمات ویژه‌ی پزشکی.',
+                path: s.uri.toString());
             return const SpecialVisitPage();
           },
         ),
@@ -77,7 +90,10 @@ final appRouter = GoRouter(
           path: '/prescriptions',
           name: 'prescriptions',
           builder: (_, s) {
-            SeoMeta.set(title: 'نسخه‌های قبلی | هلسا', description: 'مشاهده نسخه‌های الکترونیک.', path: s.uri.toString());
+            SeoMeta.set(
+                title: 'نسخه‌های قبلی | هلسا',
+                description: 'مشاهده نسخه‌های الکترونیک.',
+                path: s.uri.toString());
             return const PreviousPrescriptionsPage();
           },
         ),
@@ -85,7 +101,10 @@ final appRouter = GoRouter(
           path: '/contact',
           name: 'contact',
           builder: (_, s) {
-            SeoMeta.set(title: 'تماس با ما | هلسا', description: 'اطلاعات تماس و پشتیبانی.', path: s.uri.toString());
+            SeoMeta.set(
+                title: 'تماس با ما | هلسا',
+                description: 'اطلاعات تماس و پشتیبانی.',
+                path: s.uri.toString());
             return const ContactInfoPage();
           },
         ),
@@ -105,9 +124,12 @@ final appRouter = GoRouter(
         );
         return CustomTransitionPage(
           transitionDuration: const Duration(milliseconds: 150),
-          transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: a, child: child),
+          transitionsBuilder: (_, a, __, child) =>
+              FadeTransition(opacity: a, child: child),
           child: BlocProvider(
-            create: (_) => ChatCubit(SessionStorage(), OcrService(), PdfService())..load(initialSessionId: id),
+            create: (_) =>
+                ChatCubit(SessionStorage(), OcrService(), PdfService())
+                  ..load(initialSessionId: id),
             child: ChatPage(sessionId: id),
           ),
         );
@@ -124,14 +146,13 @@ class EnhancedAppShell extends StatefulWidget {
   State<EnhancedAppShell> createState() => _EnhancedAppShellState();
 }
 
-class _EnhancedAppShellState extends State<EnhancedAppShell> 
+class _EnhancedAppShellState extends State<EnhancedAppShell>
     with TickerProviderStateMixin {
-  
   late AnimationController _appBarController;
   late AnimationController _fabController;
   late Animation<Offset> _appBarAnimation;
   late Animation<double> _fabAnimation;
-  
+
   bool _isAppBarVisible = true;
   bool _showNavigationPanel = false;
   ScrollController? _scrollController;
@@ -139,17 +160,17 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
   @override
   void initState() {
     super.initState();
-    
+
     _appBarController = AnimationController(
       duration: const Duration(milliseconds: 300),
       vsync: this,
     );
-    
+
     _fabController = AnimationController(
       duration: const Duration(milliseconds: 200),
       vsync: this,
     );
-    
+
     _appBarAnimation = Tween<Offset>(
       begin: Offset.zero,
       end: const Offset(0, -1),
@@ -157,7 +178,7 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
       parent: _appBarController,
       curve: Curves.easeInOut,
     ));
-    
+
     _fabAnimation = Tween<double>(
       begin: 0,
       end: 1,
@@ -165,7 +186,7 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
       parent: _fabController,
       curve: Curves.easeInOut,
     ));
-    
+
     _fabController.forward();
   }
 
@@ -201,7 +222,8 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
         child: SlideTransition(
           position: _appBarAnimation,
           child: AppBar(
-            backgroundColor: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+            backgroundColor:
+                Theme.of(context).colorScheme.surface.withOpacity(0.9),
             elevation: 0,
             scrolledUnderElevation: 0,
             flexibleSpace: Container(
@@ -247,7 +269,10 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
                 onPressed: () => context.go('/chat/new'),
                 icon: const Icon(Icons.chat_bubble_outline),
                 style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withOpacity(0.3),
                   foregroundColor: Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -308,7 +333,8 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
                             width: MediaQuery.of(context).size.width * 0.85,
                             height: double.infinity,
                             child: _QuickNavigationPanel(
-                              onNavigate: () => setState(() => _showNavigationPanel = false),
+                              onNavigate: () =>
+                                  setState(() => _showNavigationPanel = false),
                             ),
                           ),
                         ),
@@ -320,7 +346,7 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
             ),
         ],
       ),
-      
+
       // Floating Action Buttons
       floatingActionButton: ScaleTransition(
         scale: _fabAnimation,
@@ -332,16 +358,17 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
               heroTag: "navigation",
               onPressed: _toggleNavigationPanel,
               backgroundColor: Theme.of(context).colorScheme.secondaryContainer,
-              foregroundColor: Theme.of(context).colorScheme.onSecondaryContainer,
+              foregroundColor:
+                  Theme.of(context).colorScheme.onSecondaryContainer,
               child: AnimatedRotation(
                 turns: _showNavigationPanel ? 0.125 : 0,
                 duration: const Duration(milliseconds: 200),
                 child: const Icon(Icons.menu),
               ),
             ),
-            
+
             const SizedBox(height: 12),
-            
+
             // Chat FAB
             FloatingActionButton(
               heroTag: "chat",
@@ -359,7 +386,7 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
 
 class _QuickNavigationPanel extends StatelessWidget {
   final VoidCallback onNavigate;
-  
+
   const _QuickNavigationPanel({required this.onNavigate});
 
   @override
@@ -413,16 +440,23 @@ class _QuickNavigationPanel extends StatelessWidget {
                       children: [
                         Text(
                           'هلسا',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
                         ),
                         Text(
                           'کلینیک هوشمند',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withOpacity(0.8),
+                                  ),
                         ),
                       ],
                     ),
@@ -430,7 +464,7 @@ class _QuickNavigationPanel extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // Quick Actions
             Expanded(
               child: Padding(
@@ -441,11 +475,10 @@ class _QuickNavigationPanel extends StatelessWidget {
                     Text(
                       'دسترسی سریع',
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                        fontWeight: FontWeight.w600,
-                      ),
+                            fontWeight: FontWeight.w600,
+                          ),
                     ),
                     const SizedBox(height: 16),
-                    
                     Expanded(
                       child: ListView(
                         children: [
@@ -546,7 +579,8 @@ class _QuickNavigationPanel extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+            color:
+                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -558,14 +592,14 @@ class _QuickNavigationPanel extends StatelessWidget {
         title: Text(
           title,
           style: Theme.of(context).textTheme.titleSmall?.copyWith(
-            fontWeight: FontWeight.w600,
-          ),
+                fontWeight: FontWeight.w600,
+              ),
         ),
         subtitle: Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-          ),
+                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+              ),
         ),
         onTap: onTap,
         shape: RoundedRectangleBorder(
@@ -606,23 +640,26 @@ class _Home extends StatelessWidget {
                 Text(
                   'به هلسا خوش آمدید',
                   style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                    fontWeight: FontWeight.bold,
-                    color: Theme.of(context).colorScheme.onPrimaryContainer,
-                  ),
+                        fontWeight: FontWeight.bold,
+                        color: Theme.of(context).colorScheme.onPrimaryContainer,
+                      ),
                 ),
                 const SizedBox(height: 8),
                 Text(
                   'کلینیک هوشمند شما',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                    color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
-                  ),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer
+                            .withOpacity(0.8),
+                      ),
                 ),
               ],
             ),
           ),
-          
+
           const SizedBox(height: 24),
-          
+
           // Quick actions
           GridView.count(
             shrinkWrap: true,
@@ -703,16 +740,19 @@ class _Home extends StatelessWidget {
               Text(
                 title,
                 style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                  fontWeight: FontWeight.w600,
-                ),
+                      fontWeight: FontWeight.w600,
+                    ),
                 textAlign: TextAlign.center,
               ),
               const SizedBox(height: 4),
               Text(
                 subtitle,
                 style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                  color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                ),
+                      color: Theme.of(context)
+                          .colorScheme
+                          .onSurface
+                          .withOpacity(0.6),
+                    ),
                 textAlign: TextAlign.center,
               ),
             ],

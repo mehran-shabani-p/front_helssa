@@ -3,7 +3,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 import '../../data/profile_service.dart';
 
-
 class ProfileState extends Equatable {
   final bool isLoading;
   final String name;
@@ -40,7 +39,8 @@ class ProfileState extends Equatable {
   }
 
   @override
-  List<Object?> get props => [isLoading, name, email, nationalId, errorMessage, saved];
+  List<Object?> get props =>
+      [isLoading, name, email, nationalId, errorMessage, saved];
 }
 
 class ProfileCubit extends Cubit<ProfileState> {
@@ -64,7 +64,10 @@ class ProfileCubit extends Cubit<ProfileState> {
     }
   }
 
-  Future<void> save({required String name, required String email, required String nationalId}) async {
+  Future<void> save(
+      {required String name,
+      required String email,
+      required String nationalId}) async {
     emit(state.copyWith(isLoading: true, errorMessage: null, saved: false));
     try {
       final sp = await SharedPreferences.getInstance();
@@ -74,7 +77,12 @@ class ProfileCubit extends Cubit<ProfileState> {
         'email': email.trim(),
         'nationalId': nationalId.trim(),
       });
-      emit(state.copyWith(isLoading: false, name: name, email: email, nationalId: nationalId, saved: true));
+      emit(state.copyWith(
+          isLoading: false,
+          name: name,
+          email: email,
+          nationalId: nationalId,
+          saved: true));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));
     }

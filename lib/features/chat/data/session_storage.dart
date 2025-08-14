@@ -10,13 +10,16 @@ class SessionStorage {
     final p = await SharedPreferences.getInstance();
     final s = p.getString(_kSessions);
     if (s == null) return [];
-    final list = (jsonDecode(s) as List).map((e) => ChatSession.fromJson(Map<String, dynamic>.from(e as Map))).toList();
+    final list = (jsonDecode(s) as List)
+        .map((e) => ChatSession.fromJson(Map<String, dynamic>.from(e as Map)))
+        .toList();
     return list;
   }
 
   Future<void> saveAll(List<ChatSession> sessions) async {
     final p = await SharedPreferences.getInstance();
-    await p.setString(_kSessions, jsonEncode(sessions.map((e) => e.toJson()).toList()));
+    await p.setString(
+        _kSessions, jsonEncode(sessions.map((e) => e.toJson()).toList()));
   }
 
   Future<String?> getActiveId() async {

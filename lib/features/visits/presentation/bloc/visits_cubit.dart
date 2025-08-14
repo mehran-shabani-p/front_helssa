@@ -8,9 +8,13 @@ class VisitsState extends Equatable {
   final List<Map<String, dynamic>> items;
   final String? errorMessage;
 
-  const VisitsState({this.isLoading = false, this.items = const [], this.errorMessage});
+  const VisitsState(
+      {this.isLoading = false, this.items = const [], this.errorMessage});
 
-  VisitsState copyWith({bool? isLoading, List<Map<String, dynamic>>? items, String? errorMessage}) {
+  VisitsState copyWith(
+      {bool? isLoading,
+      List<Map<String, dynamic>>? items,
+      String? errorMessage}) {
     return VisitsState(
       isLoading: isLoading ?? this.isLoading,
       items: items ?? this.items,
