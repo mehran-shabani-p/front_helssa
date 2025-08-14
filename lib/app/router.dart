@@ -228,10 +228,14 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
             scrolledUnderElevation: 0,
             flexibleSpace: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
+                color: Theme.of(context)
+                    .colorScheme
+                    .surface
+                    .withValues(alpha: 0.9),
                 border: Border(
                   bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
+                    color:
+                        Theme.of(context).dividerColor.withValues(alpha: 0.2),
                   ),
                 ),
               ),
@@ -269,7 +273,10 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
                 onPressed: () => context.go('/chat/new'),
                 icon: const Icon(Icons.chat_bubble_outline),
                 style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                  backgroundColor: Theme.of(context)
+                      .colorScheme
+                      .primaryContainer
+                      .withValues(alpha: 0.3),
                   foregroundColor: Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -576,7 +583,10 @@ class _QuickNavigationPanel extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+            color: Theme.of(context)
+                .colorScheme
+                .primaryContainer
+                .withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -594,7 +604,10 @@ class _QuickNavigationPanel extends StatelessWidget {
         subtitle: Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
+                color: Theme.of(context)
+                    .colorScheme
+                    .onSurface
+                    .withValues(alpha: 0.6),
               ),
         ),
         onTap: onTap,
@@ -644,7 +657,10 @@ class _Home extends StatelessWidget {
                 Text(
                   'کلینیک هوشمند شما',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
+                        color: Theme.of(context)
+                            .colorScheme
+                            .onPrimaryContainer
+                            .withValues(alpha: 0.8),
                       ),
                 ),
               ],

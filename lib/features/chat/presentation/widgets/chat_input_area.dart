@@ -331,7 +331,9 @@ class _ChatInputAreaState extends State<ChatInputArea>
                     style: IconButton.styleFrom(
                       backgroundColor: _showAttachments
                           ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surfaceContainerHighest,
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                       foregroundColor: _showAttachments
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -390,8 +392,9 @@ class _ChatInputAreaState extends State<ChatInputArea>
                             onPressed: null,
                             icon: const Icon(Icons.send_rounded),
                             style: IconButton.styleFrom(
-                              backgroundColor:
-                                  Theme.of(context).colorScheme.surfaceContainerHighest,
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
                               foregroundColor: Theme.of(context)
                                   .colorScheme
                                   .onSurfaceVariant

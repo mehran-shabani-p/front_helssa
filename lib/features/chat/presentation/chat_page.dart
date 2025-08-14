@@ -94,7 +94,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     color: Theme.of(context).colorScheme.surface,
                     border: Border(
                       bottom: BorderSide(
-                        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                        color: Theme.of(context)
+                            .dividerColor
+                            .withValues(alpha: 0.1),
                       ),
                     ),
                   ),
@@ -105,7 +107,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         onPressed: _toggleOverlay,
                         icon: const Icon(Icons.menu),
                         style: IconButton.styleFrom(
-                          backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                          backgroundColor: Theme.of(context)
+                              .colorScheme
+                              .primaryContainer
+                              .withValues(alpha: 0.3),
                           foregroundColor:
                               Theme.of(context).colorScheme.primary,
                         ),
@@ -182,7 +187,10 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                             },
                             icon: const Icon(Icons.share_outlined),
                             style: IconButton.styleFrom(
-                              backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.3),
                               foregroundColor:
                                   Theme.of(context).colorScheme.primary,
                             ),
@@ -282,7 +290,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 16, vertical: 12),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
+                                      color: Theme.of(context)
+                                          .colorScheme
+                                          .surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Row(
@@ -351,7 +361,9 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     color: Theme.of(context).colorScheme.surface,
                     border: Border(
                       top: BorderSide(
-                        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
+                        color: Theme.of(context)
+                            .dividerColor
+                            .withValues(alpha: 0.1),
                       ),
                     ),
                   ),
