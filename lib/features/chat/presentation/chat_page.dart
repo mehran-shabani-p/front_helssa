@@ -59,9 +59,9 @@ class _ChatPageState extends State<ChatPage> {
                 onPressed: () {
                   final active = state.sessions.firstWhere(
                     (s) => s.id == state.activeId,
-                    orElse: () => state.sessions.isNotEmpty ? state.sessions.first : null,
+                    orElse: () => state.sessions.isNotEmpty ? state.sessions.first : ChatSession(id: 'new', title: 'چت', createdAt: DateTime.now(), messages: []),
                   );
-                  if (active == null || active.messages.isEmpty) return;
+                  if (state.sessions.isEmpty || active.messages.isEmpty) return;
                   final text = active.messages
                       .map((m) => '${m.sender}: ${m.text}${m.imagesB64.isNotEmpty ? ' [تصویر]' : ''}')
                       .join('\n');
@@ -142,8 +142,4 @@ class _ChatPageState extends State<ChatPage> {
       ),
     );
   }
-}
-
-extension on String {
-  String take(int n) => length <= n ? this : substring(0, n);
 }
