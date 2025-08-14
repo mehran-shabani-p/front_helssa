@@ -3,7 +3,6 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:share_plus/share_plus.dart';
-import 'package:go_router/go_router.dart';
 
 import '../domain/chat_session.dart';
 import 'bloc/chat_cubit.dart';
@@ -95,7 +94,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     color: Theme.of(context).colorScheme.surface,
                     border: Border(
                       bottom: BorderSide(
-                        color: Theme.of(context).dividerColor.withOpacity(0.1),
+                        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                       ),
                     ),
                   ),
@@ -106,10 +105,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                         onPressed: _toggleOverlay,
                         icon: const Icon(Icons.menu),
                         style: IconButton.styleFrom(
-                          backgroundColor: Theme.of(context)
-                              .colorScheme
-                              .primaryContainer
-                              .withOpacity(0.3),
+                          backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                           foregroundColor:
                               Theme.of(context).colorScheme.primary,
                         ),
@@ -153,7 +149,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                           color: Theme.of(context)
                                               .colorScheme
                                               .onSurface
-                                              .withOpacity(0.6),
+                                              .withValues(alpha: 0.6),
                                         ),
                                   ),
                               ],
@@ -186,10 +182,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                             },
                             icon: const Icon(Icons.share_outlined),
                             style: IconButton.styleFrom(
-                              backgroundColor: Theme.of(context)
-                                  .colorScheme
-                                  .primaryContainer
-                                  .withOpacity(0.3),
+                              backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                               foregroundColor:
                                   Theme.of(context).colorScheme.primary,
                             ),
@@ -239,7 +232,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                 color: Theme.of(context)
                                     .colorScheme
                                     .primary
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                               ),
                               const SizedBox(height: 16),
                               Text(
@@ -251,7 +244,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface
-                                          .withOpacity(0.6),
+                                          .withValues(alpha: 0.6),
                                     ),
                               ),
                               const SizedBox(height: 8),
@@ -264,7 +257,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                       color: Theme.of(context)
                                           .colorScheme
                                           .onSurface
-                                          .withOpacity(0.4),
+                                          .withValues(alpha: 0.4),
                                     ),
                               ),
                             ],
@@ -289,9 +282,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                     padding: const EdgeInsets.symmetric(
                                         horizontal: 16, vertical: 12),
                                     decoration: BoxDecoration(
-                                      color: Theme.of(context)
-                                          .colorScheme
-                                          .surfaceVariant,
+                                      color: Theme.of(context).colorScheme.surfaceContainerHighest,
                                       borderRadius: BorderRadius.circular(20),
                                     ),
                                     child: Row(
@@ -320,7 +311,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                                                 color: Theme.of(context)
                                                     .colorScheme
                                                     .onSurface
-                                                    .withOpacity(0.7),
+                                                    .withValues(alpha: 0.7),
                                               ),
                                         ),
                                       ],
@@ -360,7 +351,7 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                     color: Theme.of(context).colorScheme.surface,
                     border: Border(
                       top: BorderSide(
-                        color: Theme.of(context).dividerColor.withOpacity(0.1),
+                        color: Theme.of(context).dividerColor.withValues(alpha: 0.1),
                       ),
                     ),
                   ),

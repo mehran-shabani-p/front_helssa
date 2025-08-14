@@ -82,11 +82,11 @@ class _MessageBubbleState extends State<MessageBubble>
                 decoration: BoxDecoration(
                   color: isUser
                       ? Theme.of(context).colorScheme.primary
-                      : Theme.of(context).colorScheme.surfaceVariant,
+                      : Theme.of(context).colorScheme.surfaceContainerHighest,
                   borderRadius: _getBorderRadius(isUser),
                   boxShadow: [
                     BoxShadow(
-                      color: Theme.of(context).shadowColor.withOpacity(0.1),
+                      color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
                       blurRadius: 4,
                       offset: const Offset(0, 1),
                     ),
@@ -129,14 +129,8 @@ class _MessageBubbleState extends State<MessageBubble>
                             style:
                                 Theme.of(context).textTheme.bodySmall?.copyWith(
                                       color: isUser
-                                          ? Theme.of(context)
-                                              .colorScheme
-                                              .onPrimary
-                                              .withOpacity(0.7)
-                                          : Theme.of(context)
-                                              .colorScheme
-                                              .onSurfaceVariant
-                                              .withOpacity(0.6),
+                                          ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.7)
+                                          : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.6),
                                       fontSize: 11,
                                     ),
                           ),
@@ -286,16 +280,16 @@ class _MessageBubbleState extends State<MessageBubble>
         padding: const EdgeInsets.all(6),
         decoration: BoxDecoration(
           color: isUser
-              ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.2)
-              : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.1),
+              ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.2)
+              : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(8),
         ),
         child: Icon(
           icon,
           size: 16,
           color: isUser
-              ? Theme.of(context).colorScheme.onPrimary.withOpacity(0.8)
-              : Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.7),
+              ? Theme.of(context).colorScheme.onPrimary.withValues(alpha: 0.8)
+              : Theme.of(context).colorScheme.onSurfaceVariant.withValues(alpha: 0.7),
         ),
       ),
     );

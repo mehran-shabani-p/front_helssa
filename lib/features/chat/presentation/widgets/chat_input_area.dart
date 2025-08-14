@@ -142,13 +142,13 @@ class _ChatInputAreaState extends State<ChatInputArea>
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.1),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
           ],
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -167,7 +167,7 @@ class _ChatInputAreaState extends State<ChatInputArea>
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurface
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                           ),
                     ),
                     const SizedBox(height: 8),
@@ -184,7 +184,7 @@ class _ChatInputAreaState extends State<ChatInputArea>
                                 color: Theme.of(context)
                                     .colorScheme
                                     .outline
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Stack(
@@ -229,13 +229,13 @@ class _ChatInputAreaState extends State<ChatInputArea>
                               color: Theme.of(context)
                                   .colorScheme
                                   .primaryContainer
-                                  .withOpacity(0.3),
+                                  .withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
                                 color: Theme.of(context)
                                     .colorScheme
                                     .primary
-                                    .withOpacity(0.3),
+                                    .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -331,7 +331,7 @@ class _ChatInputAreaState extends State<ChatInputArea>
                     style: IconButton.styleFrom(
                       backgroundColor: _showAttachments
                           ? Theme.of(context).colorScheme.primaryContainer
-                          : Theme.of(context).colorScheme.surfaceVariant,
+                          : Theme.of(context).colorScheme.surfaceContainerHighest,
                       foregroundColor: _showAttachments
                           ? Theme.of(context).colorScheme.primary
                           : Theme.of(context).colorScheme.onSurfaceVariant,
@@ -356,7 +356,7 @@ class _ChatInputAreaState extends State<ChatInputArea>
                             color: Theme.of(context)
                                 .colorScheme
                                 .onSurface
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                           ),
                           border: InputBorder.none,
                           contentPadding: const EdgeInsets.symmetric(
@@ -391,11 +391,11 @@ class _ChatInputAreaState extends State<ChatInputArea>
                             icon: const Icon(Icons.send_rounded),
                             style: IconButton.styleFrom(
                               backgroundColor:
-                                  Theme.of(context).colorScheme.surfaceVariant,
+                                  Theme.of(context).colorScheme.surfaceContainerHighest,
                               foregroundColor: Theme.of(context)
                                   .colorScheme
                                   .onSurfaceVariant
-                                  .withOpacity(0.5),
+                                  .withValues(alpha: 0.5),
                               padding: const EdgeInsets.all(12),
                             ),
                           ),
@@ -420,9 +420,9 @@ class _ChatInputAreaState extends State<ChatInputArea>
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,

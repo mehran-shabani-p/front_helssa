@@ -223,15 +223,15 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
           position: _appBarAnimation,
           child: AppBar(
             backgroundColor:
-                Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
             elevation: 0,
             scrolledUnderElevation: 0,
             flexibleSpace: Container(
               decoration: BoxDecoration(
-                color: Theme.of(context).colorScheme.surface.withOpacity(0.9),
+                color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.9),
                 border: Border(
                   bottom: BorderSide(
-                    color: Theme.of(context).dividerColor.withOpacity(0.2),
+                    color: Theme.of(context).dividerColor.withValues(alpha: 0.2),
                   ),
                 ),
               ),
@@ -269,10 +269,7 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
                 onPressed: () => context.go('/chat/new'),
                 icon: const Icon(Icons.chat_bubble_outline),
                 style: IconButton.styleFrom(
-                  backgroundColor: Theme.of(context)
-                      .colorScheme
-                      .primaryContainer
-                      .withOpacity(0.3),
+                  backgroundColor: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
                   foregroundColor: Theme.of(context).colorScheme.primary,
                 ),
               ),
@@ -455,7 +452,7 @@ class _QuickNavigationPanel extends StatelessWidget {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onPrimaryContainer
-                                        .withOpacity(0.8),
+                                        .withValues(alpha: 0.8),
                                   ),
                         ),
                       ],
@@ -579,8 +576,7 @@ class _QuickNavigationPanel extends StatelessWidget {
           width: 40,
           height: 40,
           decoration: BoxDecoration(
-            color:
-                Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+            color: Theme.of(context).colorScheme.primaryContainer.withValues(alpha: 0.3),
             borderRadius: BorderRadius.circular(10),
           ),
           child: Icon(
@@ -598,7 +594,7 @@ class _QuickNavigationPanel extends StatelessWidget {
         subtitle: Text(
           subtitle,
           style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                color: Theme.of(context).colorScheme.onSurface.withValues(alpha: 0.6),
               ),
         ),
         onTap: onTap,
@@ -648,10 +644,7 @@ class _Home extends StatelessWidget {
                 Text(
                   'کلینیک هوشمند شما',
                   style: Theme.of(context).textTheme.bodyLarge?.copyWith(
-                        color: Theme.of(context)
-                            .colorScheme
-                            .onPrimaryContainer
-                            .withOpacity(0.8),
+                        color: Theme.of(context).colorScheme.onPrimaryContainer.withValues(alpha: 0.8),
                       ),
                 ),
               ],
@@ -731,7 +724,7 @@ class _Home extends StatelessWidget {
                 width: 48,
                 height: 48,
                 decoration: BoxDecoration(
-                  color: color.withOpacity(0.1),
+                  color: color.withValues(alpha: 0.1),
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Icon(icon, color: color, size: 24),
@@ -751,7 +744,7 @@ class _Home extends StatelessWidget {
                       color: Theme.of(context)
                           .colorScheme
                           .onSurface
-                          .withOpacity(0.6),
+                          .withValues(alpha: 0.6),
                     ),
                 textAlign: TextAlign.center,
               ),

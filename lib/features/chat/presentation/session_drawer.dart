@@ -72,7 +72,7 @@ class SessionDrawer extends StatelessWidget {
                                     color: Theme.of(context)
                                         .colorScheme
                                         .onPrimaryContainer
-                                        .withOpacity(0.8),
+                                        .withValues(alpha: 0.8),
                                   ),
                         ),
                       ],
@@ -115,7 +115,7 @@ class SessionDrawer extends StatelessWidget {
                         ? Theme.of(context)
                             .colorScheme
                             .primaryContainer
-                            .withOpacity(0.3)
+                            .withValues(alpha: 0.3)
                         : null,
                     child: ListTile(
                       selected: selected,
@@ -126,7 +126,7 @@ class SessionDrawer extends StatelessWidget {
                             : Theme.of(context)
                                 .colorScheme
                                 .onSurface
-                                .withOpacity(0.6),
+                                .withValues(alpha: 0.6),
                       ),
                       title: Text(
                         s.title,
@@ -144,7 +144,7 @@ class SessionDrawer extends StatelessWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(0.6),
+                              .withValues(alpha: 0.6),
                         ),
                       ),
                       onTap: () {
@@ -158,7 +158,7 @@ class SessionDrawer extends StatelessWidget {
                           color: Theme.of(context)
                               .colorScheme
                               .onSurface
-                              .withOpacity(0.6),
+                              .withValues(alpha: 0.6),
                         ),
                         itemBuilder: (_) => [
                           const PopupMenuItem(
