@@ -9,3 +9,11 @@
 2025-08-14T00:13:09Z | agent=assistant | action=impl | ref=work | note=update share_plus share API and remove typed_data import
 2025-08-14T00:16:08Z | agent=assistant | action=test | ref=work | note=ran flutter analyze and test
 2025-08-14T00:17:25Z | agent=assistant | action=docs | ref=work | note=add follow-up test task
+2025-08-14T00:35:26Z | agent=assistant | action=plan | ref=work | note=align service endpoints with backend and add HTTP tests
+2025-08-14T00:36:21Z | agent=assistant | action=impl | ref=work | note=update endpoints and add service tests
+2025-08-14T00:36:46Z | agent=assistant | action=test | ref=work | note=flutter analyze/test unavailable
+2025-08-14T00:36:57Z | agent=assistant | action=docs | ref=work | note=update API and CHANGELOG
+2025-08-14T00:44:09Z | agent=assistant | action=plan | ref=work | note=fix Android build and replace CI workflow
+2025-08-14T00:44:43Z | agent=assistant | action=impl | ref=work | note=add ndk version, MLKit deps, replace CI workflow
+2025-08-14T00:44:44Z | agent=assistant | action=test | ref=work | note=flutter missing for analyze/test/build
+2025-08-14T00:44:45Z | agent=assistant | action=docs | ref=work | note=update NEXT_TASK and workflow doc
