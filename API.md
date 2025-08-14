@@ -4,7 +4,8 @@
 - `POST /api/verify/` – Verify OTP and obtain token; body: `{ "phone_number": "...", "code": "..." }`
 - `POST /api/profile/` – Fetch current user profile.
 - `POST /api/profile/update/` – Update profile; body includes `username` and `email`.
-- `GET/POST /api/visit/` – List or create visits.
+- `GET /api/visit/` – List visits.
+- `POST /api/visit/` – Create visits.
 - `POST /api/chat/msg/` – Send a chat message.
 - `GET /health` – Health check endpoint.
 
