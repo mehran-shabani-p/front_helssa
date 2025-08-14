@@ -59,7 +59,9 @@ class ChatCubit extends Cubit<ChatState> {
 
   Future<void> load({String? initialSessionId}) async {
     final all = await _storage.loadAll();
-    String? active = initialSessionId == 'new' ? await _storage.getActiveId() : initialSessionId;
+    String? active = initialSessionId == 'new'
+        ? await _storage.getActiveId()
+        : initialSessionId;
     if (active != null && all.any((s) => s.id == active)) {
       emit(state.copyWith(sessions: all, activeId: active));
     } else {
@@ -71,7 +73,8 @@ class ChatCubit extends Cubit<ChatState> {
 
   ChatSession _newSessionSync(List<ChatSession> list) {
     final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final s = ChatSession(id: id, title: 'جلسه جدید', createdAt: DateTime.now(), messages: []);
+    final s = ChatSession(
+        id: id, title: 'جلسه جدید', createdAt: DateTime.now(), messages: []);
     list.insert(0, s);
     return s;
   }
@@ -88,7 +91,11 @@ class ChatCubit extends Cubit<ChatState> {
     final list = [...state.sessions];
     final idx = list.indexWhere((e) => e.id == session.id);
     if (idx < 0) return;
-    list[idx] = ChatSession(id: session.id, title: newTitle.trim(), createdAt: session.createdAt, messages: session.messages);
+    list[idx] = ChatSession(
+        id: session.id,
+        title: newTitle.trim(),
+        createdAt: session.createdAt,
+        messages: session.messages);
     await _persist(list, state.activeId);
     emit(state.copyWith(sessions: list));
   }
@@ -97,17 +104,20 @@ class ChatCubit extends Cubit<ChatState> {
     final list = [...state.sessions];
     if (list.length == 1) return;
     list.removeWhere((e) => e.id == session.id);
-    final newActive = state.activeId == session.id ? list.first.id : state.activeId;
+    final newActive =
+        state.activeId == session.id ? list.first.id : state.activeId;
     await _persist(list, newActive);
     emit(state.copyWith(sessions: list, activeId: newActive));
   }
 
-  Future<void> send(String text, {List<String> imagesB64 = const [], String? pdfText}) async {
+  Future<void> send(String text,
+      {List<String> imagesB64 = const [], String? pdfText}) async {
     var messageText = text;
     var images = imagesB64;
 
     if (pdfText != null && pdfText.isNotEmpty) {
-      final extracted = await _pdf.extract(Uint8List.fromList(base64Decode(pdfText)));
+      final extracted =
+          await _pdf.extract(Uint8List.fromList(base64Decode(pdfText)));
       messageText = '$messageText\n\n[متن PDF]\n$extracted';
       images = const [];
     }
@@ -122,7 +132,12 @@ class ChatCubit extends Cubit<ChatState> {
     }
 
     final now = DateTime.now();
-    final user = ChatMessage(id: now.toIso8601String(), sender: 'user', text: messageText.isEmpty ? '(بدون متن)' : messageText, timestamp: now, imagesB64: images);
+    final user = ChatMessage(
+        id: now.toIso8601String(),
+        sender: 'user',
+        text: messageText.isEmpty ? '(بدون متن)' : messageText,
+        timestamp: now,
+        imagesB64: images);
 
     final list = [...state.sessions];
     final idx = list.indexWhere((s) => s.id == state.activeId);
@@ -135,7 +150,8 @@ class ChatCubit extends Cubit<ChatState> {
     final prefs = await SharedPreferences.getInstance();
     final token = prefs.getString('access_token');
     if (token == null || token.isEmpty) {
-      emit(state.copyWith(isTyping: false, errorMessage: 'توکن دسترسی یافت نشد.'));
+      emit(state.copyWith(
+          isTyping: false, errorMessage: 'توکن دسترسی یافت نشد.'));
       return;
     }
 
@@ -143,8 +159,15 @@ class ChatCubit extends Cubit<ChatState> {
       final api = ChatApi(token);
       final resp = await api.send(text: user.text, imagesB64: images);
       final botText = (resp['answer'] ?? '').toString();
-      final respImages = ((resp['images'] as List?) ?? const <dynamic>[]) .map((e) => e.toString()).toList();
-      active.messages.add(ChatMessage(id: DateTime.now().toIso8601String(), sender: 'bot', text: botText, timestamp: DateTime.now(), imagesB64: respImages));
+      final respImages = ((resp['images'] as List?) ?? const <dynamic>[])
+          .map((e) => e.toString())
+          .toList();
+      active.messages.add(ChatMessage(
+          id: DateTime.now().toIso8601String(),
+          sender: 'bot',
+          text: botText,
+          timestamp: DateTime.now(),
+          imagesB64: respImages));
       if (active.title == 'جلسه جدید' && user.text.trim().isNotEmpty) {
         active.title = user.text.trim().split('\n').first.take(30);
       }

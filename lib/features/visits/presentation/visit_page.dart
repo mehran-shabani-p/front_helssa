@@ -14,11 +14,13 @@ class _VisitPageState extends State<VisitPage> {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addPostFrameCallback((_) => context.read<VisitsCubit>().load());
+    WidgetsBinding.instance
+        .addPostFrameCallback((_) => context.read<VisitsCubit>().load());
   }
 
-  void _snack(BuildContext context, String m, {bool error=false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m), backgroundColor: error ? Colors.red.shade700 : null));
+  void _snack(BuildContext context, String m, {bool error = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+        content: Text(m), backgroundColor: error ? Colors.red.shade700 : null));
   }
 
   @override
@@ -31,17 +33,28 @@ class _VisitPageState extends State<VisitPage> {
             Padding(
               padding: const EdgeInsets.all(16),
               child: Row(children: [
-                Expanded(child: TextField(controller: _desc, minLines: 1, maxLines: 3, decoration: const InputDecoration(hintText: 'شرح مشکل...'))),
+                Expanded(
+                    child: TextField(
+                        controller: _desc,
+                        minLines: 1,
+                        maxLines: 3,
+                        decoration:
+                            const InputDecoration(hintText: 'شرح مشکل...'))),
                 const SizedBox(width: 8),
                 BlocBuilder<VisitsCubit, VisitsState>(
                   builder: (context, state) {
                     return FilledButton.icon(
-                      onPressed: state.isLoading ? null : () => context.read<VisitsCubit>().requestVisit(_desc.text.trim()).then((_) {
-                        if (_desc.text.trim().isNotEmpty) {
-                          _desc.clear();
-                          _snack(context, 'درخواست ثبت شد.');
-                        }
-                      }),
+                      onPressed: state.isLoading
+                          ? null
+                          : () => context
+                                  .read<VisitsCubit>()
+                                  .requestVisit(_desc.text.trim())
+                                  .then((_) {
+                                if (_desc.text.trim().isNotEmpty) {
+                                  _desc.clear();
+                                  _snack(context, 'درخواست ثبت شد.');
+                                }
+                              }),
                       icon: const Icon(Icons.send),
                       label: const Text('درخواست'),
                     );
@@ -53,7 +66,8 @@ class _VisitPageState extends State<VisitPage> {
             Expanded(
               child: BlocConsumer<VisitsCubit, VisitsState>(
                 listener: (context, state) {
-                  if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+                  if (state.errorMessage != null &&
+                      state.errorMessage!.isNotEmpty) {
                     _snack(context, 'خطا: ${state.errorMessage}', error: true);
                     context.read<VisitsCubit>().clearError();
                   }

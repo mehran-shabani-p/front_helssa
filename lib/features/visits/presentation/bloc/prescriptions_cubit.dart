@@ -8,9 +8,13 @@ class PrescriptionsState extends Equatable {
   final List<Map<String, dynamic>> items;
   final String? errorMessage;
 
-  const PrescriptionsState({this.isLoading = false, this.items = const [], this.errorMessage});
+  const PrescriptionsState(
+      {this.isLoading = false, this.items = const [], this.errorMessage});
 
-  PrescriptionsState copyWith({bool? isLoading, List<Map<String, dynamic>>? items, String? errorMessage}) {
+  PrescriptionsState copyWith(
+      {bool? isLoading,
+      List<Map<String, dynamic>>? items,
+      String? errorMessage}) {
     return PrescriptionsState(
       isLoading: isLoading ?? this.isLoading,
       items: items ?? this.items,
@@ -31,7 +35,8 @@ class PrescriptionsCubit extends Cubit<PrescriptionsState> {
     try {
       final sp = await SharedPreferences.getInstance();
       final token = sp.getString('access_token') ?? '';
-      final list = await _service.previousPrescriptions(token, nationalCode.trim());
+      final list =
+          await _service.previousPrescriptions(token, nationalCode.trim());
       emit(state.copyWith(isLoading: false, items: list));
     } catch (e) {
       emit(state.copyWith(isLoading: false, errorMessage: e.toString()));

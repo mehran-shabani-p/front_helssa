@@ -15,9 +15,10 @@ class _ParticlesBackgroundState extends State<ParticlesBackground>
   @override
   void initState() {
     super.initState();
-    _ctl = AnimationController(vsync: this, duration: const Duration(seconds: 18))
-      ..addListener(() => _model.tick())
-      ..repeat();
+    _ctl =
+        AnimationController(vsync: this, duration: const Duration(seconds: 18))
+          ..addListener(() => _model.tick())
+          ..repeat();
     _model = _Model(onNeedsPaint: () => setState(() {}));
   }
 
@@ -30,7 +31,8 @@ class _ParticlesBackgroundState extends State<ParticlesBackground>
   @override
   Widget build(BuildContext context) {
     return RepaintBoundary(
-      child: CustomPaint(painter: _Painter(_model), child: const SizedBox.expand()),
+      child: CustomPaint(
+          painter: _Painter(_model), child: const SizedBox.expand()),
     );
   }
 }
@@ -45,14 +47,16 @@ class _Model {
 
   void ensure(Size s) {
     if (s == size && ps.isNotEmpty) return;
-    size = s; ps = [];
+    size = s;
+    ps = [];
     final count = (s.shortestSide / 18).clamp(24, 64).toInt();
     for (int i = 0; i < count; i++) {
       ps.add(_Particle(
-        pos: Offset(rnd.nextDouble()*s.width, rnd.nextDouble()*s.height),
-        vel: Offset((rnd.nextDouble()-.5)*.25, (rnd.nextDouble()-.5)*.25),
-        r: rnd.nextDouble()*1.6 + .6,
-        a: rnd.nextDouble()*0.25 + 0.05,
+        pos: Offset(rnd.nextDouble() * s.width, rnd.nextDouble() * s.height),
+        vel: Offset(
+            (rnd.nextDouble() - .5) * .25, (rnd.nextDouble() - .5) * .25),
+        r: rnd.nextDouble() * 1.6 + .6,
+        a: rnd.nextDouble() * 0.25 + 0.05,
       ));
     }
   }
@@ -70,8 +74,13 @@ class _Model {
   }
 }
 
-class _Particle { Offset pos; Offset vel; double r; double a;
-  _Particle({required this.pos, required this.vel, required this.r, required this.a});
+class _Particle {
+  Offset pos;
+  Offset vel;
+  double r;
+  double a;
+  _Particle(
+      {required this.pos, required this.vel, required this.r, required this.a});
 }
 
 class _Painter extends CustomPainter {
@@ -84,23 +93,28 @@ class _Painter extends CustomPainter {
     if (m.ps.isEmpty) return;
 
     final dot = Paint()..color = Colors.white.withValues(alpha: .12);
-    final line = Paint()..color = Colors.white.withValues(alpha: .06)..strokeWidth = .6;
+    final line = Paint()
+      ..color = Colors.white.withValues(alpha: .06)
+      ..strokeWidth = .6;
 
-    const maxDist2 = 110*110;
+    const maxDist2 = 110 * 110;
     for (int i = 0; i < m.ps.length; i++) {
       final pi = m.ps[i];
-      for (int j = i+1; j < m.ps.length; j++) {
+      for (int j = i + 1; j < m.ps.length; j++) {
         final pj = m.ps[j];
         final dx = pi.pos.dx - pj.pos.dx, dy = pi.pos.dy - pj.pos.dy;
-        final d2 = dx*dx + dy*dy;
+        final d2 = dx * dx + dy * dy;
         if (d2 < maxDist2) {
           final t = 1 - (d2 / maxDist2);
-          line.color = Colors.white.withValues(alpha: .05 + .10*t);
+          line.color = Colors.white.withValues(alpha: .05 + .10 * t);
           c.drawLine(pi.pos, pj.pos, line);
         }
       }
     }
-    for (final p in m.ps) { dot.color = Colors.white.withValues(alpha: p.a); c.drawCircle(p.pos, p.r, dot); }
+    for (final p in m.ps) {
+      dot.color = Colors.white.withValues(alpha: p.a);
+      c.drawCircle(p.pos, p.r, dot);
+    }
   }
 
   @override

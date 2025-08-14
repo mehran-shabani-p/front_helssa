@@ -18,7 +18,8 @@ class AuthService {
     }
   }
 
-  Future<String> login({required String phoneNumber, required String code}) async {
+  Future<String> login(
+      {required String phoneNumber, required String code}) async {
     final uri = Uri.parse('$baseUrl/verify/');
     final r = await _client.post(
       uri,

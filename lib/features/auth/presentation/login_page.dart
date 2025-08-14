@@ -14,7 +14,8 @@ class _LoginPageState extends State<LoginPage> {
   final _phone = TextEditingController();
   final _otp = TextEditingController();
 
-  void _snack(BuildContext context, String m, {bool error=false}) => AppSnack.show(context, m, error: error);
+  void _snack(BuildContext context, String m, {bool error = false}) =>
+      AppSnack.show(context, m, error: error);
 
   @override
   Widget build(BuildContext context) {
@@ -28,7 +29,8 @@ class _LoginPageState extends State<LoginPage> {
               padding: const EdgeInsets.all(16),
               child: BlocConsumer<AuthCubit, AuthState>(
                 listener: (context, state) {
-                  if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+                  if (state.errorMessage != null &&
+                      state.errorMessage!.isNotEmpty) {
                     _snack(context, state.errorMessage!, error: true);
                     context.read<AuthCubit>().clearError();
                   }
@@ -39,16 +41,44 @@ class _LoginPageState extends State<LoginPage> {
                 builder: (context, state) {
                   return Column(
                     children: [
-                      TextField(controller: _phone, keyboardType: TextInputType.phone, decoration: const InputDecoration(labelText: 'شماره موبایل')),
+                      TextField(
+                          controller: _phone,
+                          keyboardType: TextInputType.phone,
+                          decoration:
+                              const InputDecoration(labelText: 'شماره موبایل')),
                       const SizedBox(height: 12),
-                      if (state.otpSent) TextField(controller: _otp, keyboardType: TextInputType.number, decoration: const InputDecoration(labelText: 'کد تایید')),
+                      if (state.otpSent)
+                        TextField(
+                            controller: _otp,
+                            keyboardType: TextInputType.number,
+                            decoration:
+                                const InputDecoration(labelText: 'کد تایید')),
                       const SizedBox(height: 16),
                       Row(children: [
-                        Expanded(child: OutlinedButton.icon(onPressed: state.isLoading?null:() => context.read<AuthCubit>().requestOtp(_phone.text.trim()), icon: const Icon(Icons.message_outlined), label: const Text('ارسال کد'))),
+                        Expanded(
+                            child: OutlinedButton.icon(
+                                onPressed: state.isLoading
+                                    ? null
+                                    : () => context
+                                        .read<AuthCubit>()
+                                        .requestOtp(_phone.text.trim()),
+                                icon: const Icon(Icons.message_outlined),
+                                label: const Text('ارسال کد'))),
                         const SizedBox(width: 12),
-                        Expanded(child: FilledButton.icon(onPressed: state.isLoading?null:() => context.read<AuthCubit>().login(phoneNumber: _phone.text.trim(), code: _otp.text.trim()), icon: const Icon(Icons.login), label: const Text('ورود'))),
+                        Expanded(
+                            child: FilledButton.icon(
+                                onPressed: state.isLoading
+                                    ? null
+                                    : () => context.read<AuthCubit>().login(
+                                        phoneNumber: _phone.text.trim(),
+                                        code: _otp.text.trim()),
+                                icon: const Icon(Icons.login),
+                                label: const Text('ورود'))),
                       ]),
-                      if (state.isLoading) const Padding(padding: EdgeInsets.only(top: 16), child: LinearProgressIndicator(minHeight: 2)),
+                      if (state.isLoading)
+                        const Padding(
+                            padding: EdgeInsets.only(top: 16),
+                            child: LinearProgressIndicator(minHeight: 2)),
                     ],
                   );
                 },

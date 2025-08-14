@@ -2,7 +2,11 @@ import 'package:flutter/foundation.dart' show kIsWeb;
 import 'package:universal_html/html.dart' as html;
 
 class SeoMeta {
-  static void set({required String title, required String description, String? path, String? image}) {
+  static void set(
+      {required String title,
+      required String description,
+      String? path,
+      String? image}) {
     if (!kIsWeb) return;
     final doc = html.document;
     doc.title = title;
@@ -24,7 +28,8 @@ class SeoMeta {
   static void _setMeta(String attr, String key, String content) {
     final head = html.document.head!;
     final exist = head.querySelector('meta[$attr="$key"]');
-    final el = (exist as html.MetaElement?) ?? html.MetaElement()..setAttribute(attr, key);
+    final el = (exist as html.MetaElement?) ?? html.MetaElement()
+      ..setAttribute(attr, key);
     el.content = content;
     if (el.parent == null) head.append(el);
   }
@@ -32,7 +37,8 @@ class SeoMeta {
   static void _setLink(String rel, String href) {
     final head = html.document.head!;
     final exist = head.querySelector('link[rel="$rel"]');
-    final el = (exist as html.LinkElement?) ?? html.LinkElement()..rel = rel;
+    final el = (exist as html.LinkElement?) ?? html.LinkElement()
+      ..rel = rel;
     el.href = href;
     if (el.parent == null) head.append(el);
   }

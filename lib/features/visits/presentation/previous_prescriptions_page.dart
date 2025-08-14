@@ -6,7 +6,8 @@ import 'bloc/prescriptions_cubit.dart';
 class PreviousPrescriptionsPage extends StatefulWidget {
   const PreviousPrescriptionsPage({super.key});
   @override
-  State<PreviousPrescriptionsPage> createState() => _PreviousPrescriptionsPageState();
+  State<PreviousPrescriptionsPage> createState() =>
+      _PreviousPrescriptionsPageState();
 }
 
 class _PreviousPrescriptionsPageState extends State<PreviousPrescriptionsPage> {
@@ -41,7 +42,8 @@ class _PreviousPrescriptionsPageState extends State<PreviousPrescriptionsPage> {
                     child: BlocBuilder<PrescriptionsCubit, PrescriptionsState>(
                       builder: (context, state) {
                         return FilledButton(
-                          onPressed: state.isLoading ? null : () => _load(context),
+                          onPressed:
+                              state.isLoading ? null : () => _load(context),
                           child: const Text('دریافت'),
                         );
                       },
@@ -53,7 +55,8 @@ class _PreviousPrescriptionsPageState extends State<PreviousPrescriptionsPage> {
               Expanded(
                 child: BlocConsumer<PrescriptionsCubit, PrescriptionsState>(
                   listener: (context, state) {
-                    if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+                    if (state.errorMessage != null &&
+                        state.errorMessage!.isNotEmpty) {
                       AppSnack.show(context, 'خطا: ${state.errorMessage}');
                       context.read<PrescriptionsCubit>().clearError();
                     }

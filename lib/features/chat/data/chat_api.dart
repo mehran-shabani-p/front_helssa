@@ -8,7 +8,8 @@ class ChatApi {
   final String accessToken;
   final http.Client _client;
 
-  Future<Map<String, dynamic>> send({required String text, List<String> imagesB64 = const []}) async {
+  Future<Map<String, dynamic>> send(
+      {required String text, List<String> imagesB64 = const []}) async {
     final uri = Uri.parse('$baseUrl/chat/msg/');
     final body = <String, dynamic>{'message': text};
     if (imagesB64.isNotEmpty) body['images'] = imagesB64;

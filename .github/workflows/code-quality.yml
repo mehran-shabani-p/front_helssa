@@ -188,14 +188,14 @@ jobs:
           echo "### 📦 Build Size Analysis" >> performance-report.md
           
           # Web build
-          flutter build web --release --analyze-size --tree-shake-icons
+          flutter build web --release --tree-shake-icons
           if [ -f "build/web/main.dart.js" ]; then
             WEB_SIZE=$(du -h build/web/main.dart.js | cut -f1)
             echo "Web JS bundle size: $WEB_SIZE" >> performance-report.md
           fi
           
           # Android APK analysis
-          flutter build apk --release --analyze-size --tree-shake-icons
+          flutter build apk --release --tree-shake-icons
           if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
             APK_SIZE=$(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)
             echo "Android APK size: $APK_SIZE" >> performance-report.md

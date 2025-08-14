@@ -10,8 +10,8 @@ class SessionDrawer extends StatelessWidget {
   final VoidCallback? onNavigate;
 
   const SessionDrawer({
-    super.key, 
-    required this.sessions, 
+    super.key,
+    required this.sessions,
     required this.activeId,
     this.onNavigate,
   });
@@ -57,16 +57,23 @@ class SessionDrawer extends StatelessWidget {
                       children: [
                         Text(
                           'هلسا چت',
-                          style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.bold,
-                            color: Theme.of(context).colorScheme.onPrimaryContainer,
-                          ),
+                          style:
+                              Theme.of(context).textTheme.titleLarge?.copyWith(
+                                    fontWeight: FontWeight.bold,
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer,
+                                  ),
                         ),
                         Text(
                           'پزشک هوش مصنوعی',
-                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                            color: Theme.of(context).colorScheme.onPrimaryContainer.withOpacity(0.8),
-                          ),
+                          style:
+                              Theme.of(context).textTheme.bodyMedium?.copyWith(
+                                    color: Theme.of(context)
+                                        .colorScheme
+                                        .onPrimaryContainer
+                                        .withValues(alpha: 0.8),
+                                  ),
                         ),
                       ],
                     ),
@@ -74,7 +81,7 @@ class SessionDrawer extends StatelessWidget {
                 ],
               ),
             ),
-            
+
             // New session button
             Padding(
               padding: const EdgeInsets.all(8),
@@ -90,9 +97,9 @@ class SessionDrawer extends StatelessWidget {
                 ),
               ),
             ),
-            
+
             const Divider(height: 1),
-            
+
             // Sessions list
             Expanded(
               child: ListView.builder(
@@ -104,45 +111,58 @@ class SessionDrawer extends StatelessWidget {
                   return Card(
                     margin: const EdgeInsets.symmetric(vertical: 2),
                     elevation: selected ? 2 : 0,
-                    color: selected 
-                      ? Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3)
-                      : null,
+                    color: selected
+                        ? Theme.of(context)
+                            .colorScheme
+                            .primaryContainer
+                            .withValues(alpha: 0.3)
+                        : null,
                     child: ListTile(
                       selected: selected,
                       leading: Icon(
                         Icons.chat_bubble_outline,
-                        color: selected 
-                          ? Theme.of(context).colorScheme.primary
-                          : Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                        color: selected
+                            ? Theme.of(context).colorScheme.primary
+                            : Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
                       ),
                       title: Text(
-                        s.title, 
-                        maxLines: 1, 
+                        s.title,
+                        maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                         style: TextStyle(
-                          fontWeight: selected ? FontWeight.w600 : FontWeight.normal,
+                          fontWeight:
+                              selected ? FontWeight.w600 : FontWeight.normal,
                         ),
                       ),
                       subtitle: Text(
                         _formatDate(s.createdAt),
                         style: TextStyle(
                           fontSize: 12,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.6),
                         ),
                       ),
-                      onTap: () { 
+                      onTap: () {
                         onNavigate?.call();
-                        context.go('/chat/${s.id}'); 
+                        context.go('/chat/${s.id}');
                       },
                       trailing: PopupMenuButton<String>(
                         icon: Icon(
                           Icons.more_vert,
                           size: 18,
-                          color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                          color: Theme.of(context)
+                              .colorScheme
+                              .onSurface
+                              .withValues(alpha: 0.6),
                         ),
                         itemBuilder: (_) => [
                           const PopupMenuItem(
-                            value: 'rename', 
+                            value: 'rename',
                             child: Row(
                               children: [
                                 Icon(Icons.edit_outlined, size: 18),
@@ -152,12 +172,14 @@ class SessionDrawer extends StatelessWidget {
                             ),
                           ),
                           const PopupMenuItem(
-                            value: 'delete', 
+                            value: 'delete',
                             child: Row(
                               children: [
-                                Icon(Icons.delete_outline, size: 18, color: Colors.red),
+                                Icon(Icons.delete_outline,
+                                    size: 18, color: Colors.red),
                                 SizedBox(width: 8),
-                                Text('حذف', style: TextStyle(color: Colors.red)),
+                                Text('حذف',
+                                    style: TextStyle(color: Colors.red)),
                               ],
                             ),
                           ),
@@ -170,7 +192,7 @@ class SessionDrawer extends StatelessWidget {
                               builder: (ctx) => AlertDialog(
                                 title: const Text('تغییر نام جلسه'),
                                 content: TextField(
-                                  controller: c, 
+                                  controller: c,
                                   autofocus: true,
                                   decoration: const InputDecoration(
                                     hintText: 'نام جدید جلسه',
@@ -179,18 +201,21 @@ class SessionDrawer extends StatelessWidget {
                                 ),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(ctx), 
+                                    onPressed: () => Navigator.pop(ctx),
                                     child: const Text('لغو'),
                                   ),
                                   FilledButton(
-                                    onPressed: () => Navigator.pop(ctx, c.text.trim()), 
+                                    onPressed: () =>
+                                        Navigator.pop(ctx, c.text.trim()),
                                     child: const Text('ذخیره'),
                                   ),
                                 ],
                               ),
                             );
                             if (title != null && title.isNotEmpty) {
-                              await context.read<ChatCubit>().renameSession(s, title);
+                              await context
+                                  .read<ChatCubit>()
+                                  .renameSession(s, title);
                             }
                           }
                           if (v == 'delete') {
@@ -198,14 +223,15 @@ class SessionDrawer extends StatelessWidget {
                               context: context,
                               builder: (ctx) => AlertDialog(
                                 title: const Text('حذف جلسه'),
-                                content: Text('آیا از حذف جلسه "${s.title}" مطمئن هستید؟'),
+                                content: Text(
+                                    'آیا از حذف جلسه "${s.title}" مطمئن هستید؟'),
                                 actions: [
                                   TextButton(
-                                    onPressed: () => Navigator.pop(ctx, false), 
+                                    onPressed: () => Navigator.pop(ctx, false),
                                     child: const Text('لغو'),
                                   ),
                                   FilledButton(
-                                    onPressed: () => Navigator.pop(ctx, true), 
+                                    onPressed: () => Navigator.pop(ctx, true),
                                     style: FilledButton.styleFrom(
                                       backgroundColor: Colors.red,
                                     ),
@@ -225,9 +251,9 @@ class SessionDrawer extends StatelessWidget {
                 },
               ),
             ),
-            
+
             const Divider(height: 1),
-            
+
             // Navigation to other pages
             Padding(
               padding: const EdgeInsets.all(8),
@@ -304,7 +330,7 @@ class SessionDrawer extends StatelessWidget {
   String _formatDate(DateTime date) {
     final now = DateTime.now();
     final difference = now.difference(date);
-    
+
     if (difference.inDays == 0) {
       return 'امروز';
     } else if (difference.inDays == 1) {
