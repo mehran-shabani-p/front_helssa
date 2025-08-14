@@ -1,0 +1,276 @@
+name: 🔍 Code Quality & Security
+
+on:
+  push:
+    branches: [ main, develop, for_future ]
+  pull_request:
+    branches: [ main, develop, for_future ]
+
+env:
+  FLUTTER_VERSION: '3.32.8'
+
+jobs:
+  lint-and-format:
+    name: 📝 Lint & Format Check
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🛠️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      - name: 🎨 Check Dart formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: 🔍 Dart analysis
+        run: dart analyze --fatal-infos
+
+      - name: 📊 Custom lint rules
+        run: |
+          echo "Checking for common issues..."
+          # Check for TODO comments in main branch
+          if [[ "${{ github.ref }}" == "refs/heads/main" ]]; then
+            if grep -r "TODO\|FIXME\|HACK" lib/ --include="*.dart"; then
+              echo "❌ Found TODO/FIXME/HACK comments in main branch"
+              exit 1
+            fi
+          fi
+          
+          # Check for console.log or print statements
+          if grep -r "print(" lib/ --include="*.dart"; then
+            echo "⚠️ Found print statements - consider using proper logging"
+          fi
+
+  dependency-check:
+    name: 📋 Dependency Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🛠️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      - name: 🔒 Security audit
+        run: |
+          dart pub audit --json > audit-report.json || true
+          if [ -s audit-report.json ]; then
+            echo "Security vulnerabilities found:"
+            cat audit-report.json
+          fi
+
+      - name: 📊 Dependency analysis
+        run: |
+          echo "## 📋 Dependency Report" > dependency-report.md
+          echo "" >> dependency-report.md
+          echo "### Direct Dependencies" >> dependency-report.md
+          dart pub deps --style=tree >> dependency-report.md
+          echo "" >> dependency-report.md
+          echo "### Outdated Packages" >> dependency-report.md
+          dart pub outdated --json > outdated.json || true
+          if [ -s outdated.json ]; then
+            echo "Found outdated packages - review for updates" >> dependency-report.md
+          else
+            echo "All packages are up to date! ✅" >> dependency-report.md
+          fi
+
+      - name: 📤 Upload reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: dependency-reports
+          path: |
+            audit-report.json
+            dependency-report.md
+            outdated.json
+          retention-days: 30
+
+  code-metrics:
+    name: 📈 Code Metrics
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🛠️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      - name: 📊 Generate code metrics
+        run: |
+          echo "## 📈 Code Metrics Report" > metrics-report.md
+          echo "" >> metrics-report.md
+          
+          # Count lines of code
+          echo "### 📏 Lines of Code" >> metrics-report.md
+          find lib -name "*.dart" -exec wc -l {} + | tail -1 | awk '{print "Total lines: " $1}' >> metrics-report.md
+          echo "" >> metrics-report.md
+          
+          # Count files
+          echo "### 📁 File Count" >> metrics-report.md
+          echo "Dart files: $(find lib -name "*.dart" | wc -l)" >> metrics-report.md
+          echo "Test files: $(find test -name "*.dart" 2>/dev/null | wc -l || echo 0)" >> metrics-report.md
+          echo "" >> metrics-report.md
+          
+          # Widget analysis
+          echo "### 🧩 Widget Analysis" >> metrics-report.md
+          echo "StatelessWidget count: $(grep -r "extends StatelessWidget" lib --include="*.dart" | wc -l)" >> metrics-report.md
+          echo "StatefulWidget count: $(grep -r "extends StatefulWidget" lib --include="*.dart" | wc -l)" >> metrics-report.md
+          echo "" >> metrics-report.md
+
+      - name: 🧪 Test coverage analysis
+        run: |
+          if [ -d "test" ]; then
+            flutter test --coverage
+            echo "### 🧪 Test Coverage" >> metrics-report.md
+            if [ -f "coverage/lcov.info" ]; then
+              echo "Coverage report generated ✅" >> metrics-report.md
+            else
+              echo "No coverage data available ❌" >> metrics-report.md
+            fi
+          else
+            echo "### 🧪 Test Coverage" >> metrics-report.md
+            echo "No tests found ❌" >> metrics-report.md
+          fi
+
+      - name: 📤 Upload metrics
+        uses: actions/upload-artifact@v4
+        with:
+          name: code-metrics
+          path: |
+            metrics-report.md
+            coverage/
+          retention-days: 30
+
+  performance-analysis:
+    name: ⚡ Performance Analysis
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🛠️ Setup Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: 📦 Get dependencies
+        run: flutter pub get
+
+      - name: 🔍 Build analysis
+        run: |
+          echo "## ⚡ Performance Analysis" > performance-report.md
+          echo "" >> performance-report.md
+          
+          # Build size analysis
+          echo "### 📦 Build Size Analysis" >> performance-report.md
+          
+          # Web build
+          flutter build web --release --analyze-size --tree-shake-icons
+          if [ -f "build/web/main.dart.js" ]; then
+            WEB_SIZE=$(du -h build/web/main.dart.js | cut -f1)
+            echo "Web JS bundle size: $WEB_SIZE" >> performance-report.md
+          fi
+          
+          # Android APK analysis
+          flutter build apk --release --analyze-size --tree-shake-icons
+          if [ -f "build/app/outputs/flutter-apk/app-release.apk" ]; then
+            APK_SIZE=$(du -h build/app/outputs/flutter-apk/app-release.apk | cut -f1)
+            echo "Android APK size: $APK_SIZE" >> performance-report.md
+          fi
+          
+          echo "" >> performance-report.md
+          echo "### 🎯 Optimization Suggestions" >> performance-report.md
+          echo "- Enable tree shaking ✅" >> performance-report.md
+          echo "- Optimize images and assets" >> performance-report.md
+          echo "- Use const constructors where possible" >> performance-report.md
+          echo "- Minimize widget rebuilds" >> performance-report.md
+
+      - name: 📤 Upload performance report
+        uses: actions/upload-artifact@v4
+        with:
+          name: performance-analysis
+          path: |
+            performance-report.md
+            build/
+          retention-days: 7
+
+  pr-comment:
+    name: 💬 PR Comment
+    runs-on: ubuntu-latest
+    needs: [lint-and-format, dependency-check, code-metrics, performance-analysis]
+    if: github.event_name == 'pull_request'
+    
+    steps:
+      - name: 📥 Download all reports
+        uses: actions/download-artifact@v4
+
+      - name: 📝 Create PR comment
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🔍 Code Quality Report\n\n';
+            
+            // Add metrics if available
+            try {
+              if (fs.existsSync('code-metrics/metrics-report.md')) {
+                const metrics = fs.readFileSync('code-metrics/metrics-report.md', 'utf8');
+                comment += metrics + '\n\n';
+              }
+            } catch (e) {
+              console.log('No metrics report found');
+            }
+            
+            // Add performance analysis
+            try {
+              if (fs.existsSync('performance-analysis/performance-report.md')) {
+                const performance = fs.readFileSync('performance-analysis/performance-report.md', 'utf8');
+                comment += performance + '\n\n';
+              }
+            } catch (e) {
+              console.log('No performance report found');
+            }
+            
+            // Add dependency info
+            try {
+              if (fs.existsSync('dependency-reports/dependency-report.md')) {
+                const deps = fs.readFileSync('dependency-reports/dependency-report.md', 'utf8');
+                comment += deps + '\n\n';
+              }
+            } catch (e) {
+              console.log('No dependency report found');
+            }
+            
+            comment += '---\n';
+            comment += `🤖 *Automated analysis for commit ${context.sha.substring(0, 7)}*`;
+            
+            // Post comment
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: comment
+            });
