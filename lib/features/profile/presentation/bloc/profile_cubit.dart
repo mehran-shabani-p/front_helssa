@@ -1,7 +1,8 @@
 import 'package:equatable/equatable.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import '../../../data/profile_service.dart';
+import '../../data/profile_service.dart';
+
 
 class ProfileState extends Equatable {
   final bool isLoading;
