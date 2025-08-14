@@ -350,7 +350,3 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
     );
   }
 }
-
-extension on String {
-  String take(int n) => length <= n ? this : substring(0, n);
-}
