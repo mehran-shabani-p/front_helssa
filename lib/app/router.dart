@@ -17,7 +17,12 @@ import '../features/visits/presentation/previous_prescriptions_page.dart';
 import '../contact_info.dart';
 
 // Chat
+import 'package:flutter_bloc/flutter_bloc.dart';
 import '../features/chat/presentation/chat_page.dart';
+import '../features/chat/presentation/bloc/chat_cubit.dart';
+import '../features/chat/data/session_storage.dart';
+import '../features/chat/data/ocr_service.dart';
+import '../features/chat/data/pdf_service.dart';
 
 final appRouter = GoRouter(
   routes: [
@@ -101,7 +106,10 @@ final appRouter = GoRouter(
         return CustomTransitionPage(
           transitionDuration: const Duration(milliseconds: 150),
           transitionsBuilder: (_, a, __, child) => FadeTransition(opacity: a, child: child),
-          child: ChatPage(sessionId: id),
+          child: BlocProvider(
+            create: (_) => ChatCubit(SessionStorage(), OcrService(), PdfService())..load(initialSessionId: id),
+            child: ChatPage(sessionId: id),
+          ),
         );
       },
     ),
