@@ -214,10 +214,7 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
                 ),
               ),
               child: ClipRect(
-                child: BackdropFilter(
-                  filter: const ColorFilter.mode(Colors.transparent, BlendMode.multiply),
-                  child: Container(color: Colors.transparent),
-                ),
+                child: Container(color: Colors.transparent),
               ),
             ),
             title: Row(
@@ -289,6 +286,38 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
               ),
             ),
           ),
+          if (_showNavigationPanel)
+            Positioned.fill(
+              child: GestureDetector(
+                onTap: () => setState(() => _showNavigationPanel = false),
+                child: Container(
+                  color: Colors.black54,
+                  child: SafeArea(
+                    child: Align(
+                      alignment: Alignment.centerRight,
+                      child: SlideTransition(
+                        position: Tween<Offset>(
+                          begin: const Offset(1.0, 0.0),
+                          end: Offset.zero,
+                        ).animate(CurvedAnimation(
+                          parent: _fabController,
+                          curve: Curves.easeInOut,
+                        )),
+                        child: Material(
+                          child: Container(
+                            width: MediaQuery.of(context).size.width * 0.85,
+                            height: double.infinity,
+                            child: _QuickNavigationPanel(
+                              onNavigate: () => setState(() => _showNavigationPanel = false),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ),
+                  ),
+                ),
+              ),
+            ),
         ],
       ),
       
@@ -324,40 +353,6 @@ class _EnhancedAppShellState extends State<EnhancedAppShell>
           ],
         ),
       ),
-      
-      // Navigation Panel Overlay
-      if (_showNavigationPanel)
-        Positioned.fill(
-          child: GestureDetector(
-            onTap: () => setState(() => _showNavigationPanel = false),
-            child: Container(
-              color: Colors.black54,
-              child: SafeArea(
-                child: Align(
-                  alignment: Alignment.centerRight,
-                  child: SlideTransition(
-                    position: Tween<Offset>(
-                      begin: const Offset(1.0, 0.0),
-                      end: Offset.zero,
-                    ).animate(CurvedAnimation(
-                      parent: _fabController,
-                      curve: Curves.easeInOut,
-                    )),
-                    child: Material(
-                      child: Container(
-                        width: MediaQuery.of(context).size.width * 0.85,
-                        height: double.infinity,
-                        child: _QuickNavigationPanel(
-                          onNavigate: () => setState(() => _showNavigationPanel = false),
-                        ),
-                      ),
-                    ),
-                  ),
-                ),
-              ),
-            ),
-          ),
-        ),
     );
   }
 }

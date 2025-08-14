@@ -150,9 +150,11 @@ class _ChatPageState extends State<ChatPage> with TickerProviderStateMixin {
                             onPressed: () {
                               final active = state.sessions.firstWhere(
                                 (s) => s.id == state.activeId,
-                                orElse: () => state.sessions.isNotEmpty ? state.sessions.first : null,
+                                orElse: () => state.sessions.isNotEmpty 
+                                  ? state.sessions.first 
+                                  : ChatSession(id: 'new', title: 'چت جدید', createdAt: DateTime.now(), messages: []),
                               );
-                              if (active == null || active.messages.isEmpty) return;
+                              if (active.messages.isEmpty) return;
                               final text = active.messages
                                   .map((m) => '${m.sender}: ${m.text}${m.imagesB64.isNotEmpty ? ' [تصویر]' : ''}')
                                   .join('\n');
