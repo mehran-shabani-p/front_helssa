@@ -8,7 +8,8 @@ class ProfileService {
 
   Future<Map<String, dynamic>> fetchProfile(String token) async {
     final uri = Uri.parse('$baseUrl/profile/');
-    final r = await _client.post(uri, headers: {'Authorization': 'Bearer $token'});
+    final r =
+        await _client.post(uri, headers: {'Authorization': 'Bearer $token'});
     if (r.statusCode != 200) {
       throw Exception('Fetch profile failed: ${r.statusCode}');
     }

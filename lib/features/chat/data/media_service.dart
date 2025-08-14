@@ -22,7 +22,11 @@ class MediaService {
     }
 
     final x = await _picker.pickImage(
-      source: src, imageQuality: 100, maxWidth: 4096, maxHeight: 4096, preferredCameraDevice: CameraDevice.rear,
+      source: src,
+      imageQuality: 100,
+      maxWidth: 4096,
+      maxHeight: 4096,
+      preferredCameraDevice: CameraDevice.rear,
     );
     if (x == null) return null;
     final bytes = await x.readAsBytes();
@@ -30,13 +34,15 @@ class MediaService {
   }
 
   Future<Uint8List> rotate90(Uint8List src) async {
-    final i = img.decodeImage(src); if (i == null) return src;
+    final i = img.decodeImage(src);
+    if (i == null) return src;
     final r = img.copyRotate(i, angle: 90);
     return Uint8List.fromList(img.encodeJpg(r, quality: 85));
   }
 
   Future<Uint8List> cropCenterSquare(Uint8List src) async {
-    final i = img.decodeImage(src); if (i == null) return src;
+    final i = img.decodeImage(src);
+    if (i == null) return src;
     final m = i.width < i.height ? i.width : i.height;
     final x = (i.width - m) ~/ 2, y = (i.height - m) ~/ 2;
     final c = img.copyCrop(i, x: x, y: y, width: m, height: m);
@@ -50,7 +56,9 @@ class MediaService {
     const maxSide = 1600;
     img.Image resized = src;
     if (src.width > maxSide || src.height > maxSide) {
-      resized = src.width >= src.height ? img.copyResize(src, width: maxSide) : img.copyResize(src, height: maxSide);
+      resized = src.width >= src.height
+          ? img.copyResize(src, width: maxSide)
+          : img.copyResize(src, height: maxSide);
     }
 
     int q = 82;

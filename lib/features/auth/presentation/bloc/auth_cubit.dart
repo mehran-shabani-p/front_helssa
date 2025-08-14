@@ -49,7 +49,8 @@ class AuthCubit extends Cubit<AuthState> {
     }
   }
 
-  Future<void> login({required String phoneNumber, required String code}) async {
+  Future<void> login(
+      {required String phoneNumber, required String code}) async {
     if (state.isLoading) return;
     emit(state.copyWith(isLoading: true, errorMessage: null));
     try {

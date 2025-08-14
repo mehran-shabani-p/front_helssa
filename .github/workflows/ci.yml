@@ -48,8 +48,11 @@ jobs:
       - name: 🔍 Analyze code
         run: flutter analyze --no-fatal-infos --no-congratulate
 
+      - name: 🧰 Activate dart_code_metrics
+        run: dart pub global activate dart_code_metrics
+
       - name: 🚨 Check for dead code
-        run: dart run dart_code_metrics:metrics analyze lib --reporter=github
+        run: dart pub global run dart_code_metrics:metrics analyze lib --reporter=github
 
       - name: 📝 Generate dependency report
         run: |

@@ -16,20 +16,21 @@ class ChatMessage {
   });
 
   Map<String, dynamic> toJson() => {
-    'id': id,
-    'sender': sender,
-    'text': text,
-    'timestamp': timestamp.toIso8601String(),
-    'images': imagesB64,
-    'isTyping': isTyping,
-  };
+        'id': id,
+        'sender': sender,
+        'text': text,
+        'timestamp': timestamp.toIso8601String(),
+        'images': imagesB64,
+        'isTyping': isTyping,
+      };
 
   factory ChatMessage.fromJson(Map<String, dynamic> j) => ChatMessage(
-    id: j['id'],
-    sender: j['sender'],
-    text: j['text'] ?? '',
-    timestamp: DateTime.parse(j['timestamp']),
-    imagesB64: (j['images'] as List?)?.map((e) => e.toString()).toList() ?? const [],
-    isTyping: j['isTyping'] == true,
-  );
+        id: j['id'],
+        sender: j['sender'],
+        text: j['text'] ?? '',
+        timestamp: DateTime.parse(j['timestamp']),
+        imagesB64: (j['images'] as List?)?.map((e) => e.toString()).toList() ??
+            const [],
+        isTyping: j['isTyping'] == true,
+      );
 }

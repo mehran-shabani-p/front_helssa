@@ -6,19 +6,25 @@ import 'package:flutter/services.dart';
 import 'package:image_picker/image_picker.dart';
 import '../../data/media_service.dart';
 
-typedef OnSend = void Function(String text, {List<String> imagesB64, String? pdfText});
+typedef OnSend = void Function(String text,
+    {List<String> imagesB64, String? pdfText});
 
 class ChatInputArea extends StatefulWidget {
   final TextEditingController controller;
   final FocusNode focus;
   final OnSend onSend;
-  const ChatInputArea({super.key, required this.controller, required this.focus, required this.onSend});
+  const ChatInputArea(
+      {super.key,
+      required this.controller,
+      required this.focus,
+      required this.onSend});
 
   @override
   State<ChatInputArea> createState() => _ChatInputAreaState();
 }
 
-class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateMixin {
+class _ChatInputAreaState extends State<ChatInputArea>
+    with TickerProviderStateMixin {
   final _media = MediaService();
   final List<Uint8List> _images = [];
   String? _pdfText;
@@ -37,7 +43,7 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
       parent: _attachmentController,
       curve: Curves.easeInOut,
     );
-    
+
     // Listen to text changes to show/hide send button
     widget.controller.addListener(_onTextChanged);
   }
@@ -53,7 +59,10 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
     setState(() {});
   }
 
-  bool get _hasContent => widget.controller.text.trim().isNotEmpty || _images.isNotEmpty || _pdfText != null;
+  bool get _hasContent =>
+      widget.controller.text.trim().isNotEmpty ||
+      _images.isNotEmpty ||
+      _pdfText != null;
 
   Future<void> _pick(ImageSource src) async {
     final b = await _media.pick(src);
@@ -64,7 +73,8 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
   }
 
   Future<void> _pickPdf() async {
-    final res = await FilePicker.platform.pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
+    final res = await FilePicker.platform
+        .pickFiles(type: FileType.custom, allowedExtensions: ['pdf']);
     if (res == null || res.files.single.bytes == null) return;
     setState(() => _pdfText = base64Encode(res.files.single.bytes!));
     _toggleAttachments(false);
@@ -106,16 +116,16 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
       );
       return;
     }
-    
+
     widget.onSend(
       txt.isEmpty ? '(بدون متن)' : txt,
       imagesB64: _images.map((b) => base64Encode(b)).toList(),
       pdfText: _pdfText,
     );
     widget.controller.clear();
-    setState(() { 
-      _images.clear(); 
-      _pdfText = null; 
+    setState(() {
+      _images.clear();
+      _pdfText = null;
       _showAttachments = false;
     });
     _attachmentController.reset();
@@ -132,13 +142,13 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
           borderRadius: BorderRadius.circular(24),
           boxShadow: [
             BoxShadow(
-              color: Theme.of(context).shadowColor.withOpacity(0.1),
+              color: Theme.of(context).shadowColor.withValues(alpha: 0.1),
               blurRadius: 10,
               offset: const Offset(0, -2),
             ),
           ],
           border: Border.all(
-            color: Theme.of(context).colorScheme.outline.withOpacity(0.2),
+            color: Theme.of(context).colorScheme.outline.withValues(alpha: 0.2),
           ),
         ),
         child: Column(
@@ -154,8 +164,11 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                     Text(
                       'فایل‌های انتخاب شده:',
                       style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                        color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
-                      ),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
+                          ),
                     ),
                     const SizedBox(height: 8),
                     Wrap(
@@ -168,7 +181,10 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                             decoration: BoxDecoration(
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Theme.of(context).colorScheme.outline.withOpacity(0.3),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .outline
+                                    .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Stack(
@@ -176,9 +192,9 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                                 ClipRRect(
                                   borderRadius: BorderRadius.circular(11),
                                   child: Image.memory(
-                                    _images[i], 
-                                    width: 80, 
-                                    height: 80, 
+                                    _images[i],
+                                    width: 80,
+                                    height: 80,
                                     fit: BoxFit.cover,
                                   ),
                                 ),
@@ -191,9 +207,12 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                                       borderRadius: BorderRadius.circular(12),
                                     ),
                                     child: IconButton(
-                                      onPressed: () => setState(() => _images.removeAt(i)),
-                                      icon: const Icon(Icons.close, size: 16, color: Colors.white),
-                                      constraints: const BoxConstraints(minWidth: 24, minHeight: 24),
+                                      onPressed: () =>
+                                          setState(() => _images.removeAt(i)),
+                                      icon: const Icon(Icons.close,
+                                          size: 16, color: Colors.white),
+                                      constraints: const BoxConstraints(
+                                          minWidth: 24, minHeight: 24),
                                       padding: EdgeInsets.zero,
                                     ),
                                   ),
@@ -204,12 +223,19 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                         // PDF
                         if (_pdfText != null)
                           Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 12, vertical: 8),
                             decoration: BoxDecoration(
-                              color: Theme.of(context).colorScheme.primaryContainer.withOpacity(0.3),
+                              color: Theme.of(context)
+                                  .colorScheme
+                                  .primaryContainer
+                                  .withValues(alpha: 0.3),
                               borderRadius: BorderRadius.circular(12),
                               border: Border.all(
-                                color: Theme.of(context).colorScheme.primary.withOpacity(0.3),
+                                color: Theme.of(context)
+                                    .colorScheme
+                                    .primary
+                                    .withValues(alpha: 0.3),
                               ),
                             ),
                             child: Row(
@@ -223,9 +249,14 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                                 const SizedBox(width: 8),
                                 Text(
                                   'PDF انتخاب‌شده',
-                                  style: Theme.of(context).textTheme.bodyMedium?.copyWith(
-                                    color: Theme.of(context).colorScheme.primary,
-                                  ),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .bodyMedium
+                                      ?.copyWith(
+                                        color: Theme.of(context)
+                                            .colorScheme
+                                            .primary,
+                                      ),
                                 ),
                                 const SizedBox(width: 8),
                                 GestureDetector(
@@ -233,7 +264,8 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                                   child: Icon(
                                     Icons.close,
                                     size: 16,
-                                    color: Theme.of(context).colorScheme.primary,
+                                    color:
+                                        Theme.of(context).colorScheme.primary,
                                   ),
                                 ),
                               ],
@@ -244,7 +276,7 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                   ],
                 ),
               ),
-            
+
             // Attachment options (expandable)
             AnimatedBuilder(
               animation: _attachmentAnimation,
@@ -255,7 +287,8 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                 );
               },
               child: Container(
-                padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                padding:
+                    const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
                 child: Row(
                   mainAxisAlignment: MainAxisAlignment.spaceEvenly,
                   children: [
@@ -281,7 +314,7 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                 ),
               ),
             ),
-            
+
             // Main input row
             Container(
               padding: const EdgeInsets.fromLTRB(8, 8, 16, 8),
@@ -296,16 +329,18 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                       child: const Icon(Icons.add),
                     ),
                     style: IconButton.styleFrom(
-                      backgroundColor: _showAttachments 
-                        ? Theme.of(context).colorScheme.primaryContainer
-                        : Theme.of(context).colorScheme.surfaceVariant,
+                      backgroundColor: _showAttachments
+                          ? Theme.of(context).colorScheme.primaryContainer
+                          : Theme.of(context)
+                              .colorScheme
+                              .surfaceContainerHighest,
                       foregroundColor: _showAttachments
-                        ? Theme.of(context).colorScheme.primary
-                        : Theme.of(context).colorScheme.onSurfaceVariant,
+                          ? Theme.of(context).colorScheme.primary
+                          : Theme.of(context).colorScheme.onSurfaceVariant,
                     ),
                   ),
                   const SizedBox(width: 8),
-                  
+
                   // Text input
                   Expanded(
                     child: Container(
@@ -320,10 +355,14 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                         decoration: InputDecoration(
                           hintText: 'پیام خود را بنویسید...',
                           hintStyle: TextStyle(
-                            color: Theme.of(context).colorScheme.onSurface.withOpacity(0.6),
+                            color: Theme.of(context)
+                                .colorScheme
+                                .onSurface
+                                .withValues(alpha: 0.6),
                           ),
                           border: InputBorder.none,
-                          contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                          contentPadding: const EdgeInsets.symmetric(
+                              horizontal: 16, vertical: 12),
                         ),
                         onSubmitted: (_) {
                           if (_hasContent) _attemptSend();
@@ -331,31 +370,38 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
                       ),
                     ),
                   ),
-                  
+
                   const SizedBox(width: 8),
-                  
+
                   // Send button
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 200),
                     child: _hasContent
-                      ? IconButton(
-                          onPressed: _attemptSend,
-                          icon: const Icon(Icons.send_rounded),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.primary,
-                            foregroundColor: Theme.of(context).colorScheme.onPrimary,
-                            padding: const EdgeInsets.all(12),
+                        ? IconButton(
+                            onPressed: _attemptSend,
+                            icon: const Icon(Icons.send_rounded),
+                            style: IconButton.styleFrom(
+                              backgroundColor:
+                                  Theme.of(context).colorScheme.primary,
+                              foregroundColor:
+                                  Theme.of(context).colorScheme.onPrimary,
+                              padding: const EdgeInsets.all(12),
+                            ),
+                          )
+                        : IconButton(
+                            onPressed: null,
+                            icon: const Icon(Icons.send_rounded),
+                            style: IconButton.styleFrom(
+                              backgroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .surfaceContainerHighest,
+                              foregroundColor: Theme.of(context)
+                                  .colorScheme
+                                  .onSurfaceVariant
+                                  .withValues(alpha: 0.5),
+                              padding: const EdgeInsets.all(12),
+                            ),
                           ),
-                        )
-                      : IconButton(
-                          onPressed: null,
-                          icon: const Icon(Icons.send_rounded),
-                          style: IconButton.styleFrom(
-                            backgroundColor: Theme.of(context).colorScheme.surfaceVariant,
-                            foregroundColor: Theme.of(context).colorScheme.onSurfaceVariant.withOpacity(0.5),
-                            padding: const EdgeInsets.all(12),
-                          ),
-                        ),
                   ),
                 ],
               ),
@@ -377,9 +423,9 @@ class _ChatInputAreaState extends State<ChatInputArea> with TickerProviderStateM
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
         decoration: BoxDecoration(
-          color: color.withOpacity(0.1),
+          color: color.withValues(alpha: 0.1),
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: color.withOpacity(0.3)),
+          border: Border.all(color: color.withValues(alpha: 0.3)),
         ),
         child: Row(
           mainAxisSize: MainAxisSize.min,
