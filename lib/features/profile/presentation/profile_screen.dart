@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import 'package:shared_preferences/shared_preferences.dart';
-import '../data/profile_service.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
+import 'bloc/profile_cubit.dart';
 
 class ProfileScreen extends StatefulWidget {
   const ProfileScreen({super.key});
@@ -9,38 +9,18 @@ class ProfileScreen extends StatefulWidget {
 }
 
 class _ProfileScreenState extends State<ProfileScreen> {
-  final _svc = ProfileService();
   final _name = TextEditingController();
   final _email = TextEditingController();
   final _nationalId = TextEditingController();
-  bool _busy = false;
-
-  Future<void> _load() async {
-    setState(() => _busy = true);
-    try {
-      final sp = await SharedPreferences.getInstance();
-      final t = sp.getString('access_token') ?? '';
-      final p = await _svc.fetchProfile(t);
-      _name.text = (p['name'] ?? '').toString();
-      _email.text = (p['email'] ?? '').toString();
-      _nationalId.text = (p['nationalId'] ?? '').toString();
-    } catch (_) {} finally { setState(() => _busy = false); }
-  }
-
-  Future<void> _save() async {
-    setState(() => _busy = true);
-    try {
-      final sp = await SharedPreferences.getInstance();
-      final t = sp.getString('access_token') ?? '';
-      await _svc.updateProfile(t, {'name': _name.text.trim(), 'email': _email.text.trim(), 'nationalId': _nationalId.text.trim()});
-      if (!mounted) return;
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ذخیره شد')));
-    } catch (e) { ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('خطا: $e'))); }
-    finally { setState(() => _busy = false); }
-  }
 
   @override
-  void initState() { super.initState(); _load(); }
+  void initState() {
+    super.initState();
+    // Load profile on first frame to ensure context availability
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      context.read<ProfileCubit>().load();
+    });
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -52,20 +32,38 @@ class _ProfileScreenState extends State<ProfileScreen> {
             constraints: const BoxConstraints(maxWidth: 560),
             child: Padding(
               padding: const EdgeInsets.all(16),
-              child: Column(children: [
-                TextField(controller: _name, decoration: const InputDecoration(labelText: 'نام')),
-                const SizedBox(height: 12),
-                TextField(controller: _email, decoration: const InputDecoration(labelText: 'ایمیل')),
-                const SizedBox(height: 12),
-                TextField(controller: _nationalId, decoration: const InputDecoration(labelText: 'کد ملی')),
-                const SizedBox(height: 16),
-                Row(children: [
-                  Expanded(child: OutlinedButton(onPressed: _busy?null:_load, child: const Text('بارگیری دوباره'))),
-                  const SizedBox(width: 12),
-                  Expanded(child: FilledButton(onPressed: _busy?null:_save, child: const Text('ذخیره'))),
-                ]),
-                if (_busy) const Padding(padding: EdgeInsets.only(top: 16), child: LinearProgressIndicator(minHeight: 2)),
-              ]),
+              child: BlocConsumer<ProfileCubit, ProfileState>(
+                listener: (context, state) {
+                  if (state.errorMessage != null && state.errorMessage!.isNotEmpty) {
+                    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('خطا: ${state.errorMessage}')));
+                    context.read<ProfileCubit>().clearError();
+                  }
+                  if (state.saved) {
+                    ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('ذخیره شد')));
+                    context.read<ProfileCubit>().clearSaved();
+                  }
+                },
+                builder: (context, state) {
+                  _name.value = _name.value.copyWith(text: state.name, selection: TextSelection.collapsed(offset: state.name.length));
+                  _email.value = _email.value.copyWith(text: state.email, selection: TextSelection.collapsed(offset: state.email.length));
+                  _nationalId.value = _nationalId.value.copyWith(text: state.nationalId, selection: TextSelection.collapsed(offset: state.nationalId.length));
+
+                  return Column(children: [
+                    TextField(controller: _name, decoration: const InputDecoration(labelText: 'نام')),
+                    const SizedBox(height: 12),
+                    TextField(controller: _email, decoration: const InputDecoration(labelText: 'ایمیل')),
+                    const SizedBox(height: 12),
+                    TextField(controller: _nationalId, decoration: const InputDecoration(labelText: 'کد ملی')),
+                    const SizedBox(height: 16),
+                    Row(children: [
+                      Expanded(child: OutlinedButton(onPressed: state.isLoading?null:() => context.read<ProfileCubit>().load(), child: const Text('بارگیری دوباره'))),
+                      const SizedBox(width: 12),
+                      Expanded(child: FilledButton(onPressed: state.isLoading?null:() => context.read<ProfileCubit>().save(name: _name.text, email: _email.text, nationalId: _nationalId.text), child: const Text('ذخیره'))),
+                    ]),
+                    if (state.isLoading) const Padding(padding: EdgeInsets.only(top: 16), child: LinearProgressIndicator(minHeight: 2)),
+                  ]);
+                },
+              ),
             ),
           ),
         ),
