@@ -17,3 +17,6 @@
 2025-08-14T00:44:43Z | agent=assistant | action=impl | ref=work | note=add ndk version, MLKit deps, replace CI workflow
 2025-08-14T00:44:44Z | agent=assistant | action=test | ref=work | note=flutter missing for analyze/test/build
 2025-08-14T00:44:45Z | agent=assistant | action=docs | ref=work | note=update NEXT_TASK and workflow doc
+2025-08-14T00:56:59Z | agent=assistant | action=plan | ref=work | note=fix login parameter names and add national code input for prescriptions
+2025-08-14T00:57:58Z | agent=assistant | action=impl | ref=work | note=fix login params, add national code input, use AppSnack
+2025-08-14T00:58:01Z | agent=assistant | action=test | ref=work | note=flutter missing for analyze/test/build

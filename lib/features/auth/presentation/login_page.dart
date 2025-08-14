@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:shared_preferences/shared_preferences.dart';
+import '../../../core/utils/snackbar.dart';
 import '../data/auth_service.dart';
 
 class LoginPage extends StatefulWidget {
@@ -27,16 +28,14 @@ class _LoginPageState extends State<LoginPage> {
     if (_otp.text.trim().isEmpty) { _snack('کد را وارد کنید.'); return; }
     setState(() => _busy = true);
     try {
-      final t = await _auth.login(phone: _phone.text.trim(), otp: _otp.text.trim());
+      final t = await _auth.login(phoneNumber: _phone.text.trim(), code: _otp.text.trim());
       final sp = await SharedPreferences.getInstance(); await sp.setString('access_token', t);
       if (!mounted) return; context.go('/chat/new');
     } catch (e) { _snack('ورود ناموفق: $e', error: true); }
     finally { setState(() => _busy = false); }
   }
 
-  void _snack(String m, {bool error=false}) {
-    ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(m), backgroundColor: error? Colors.red.shade700 : null));
-  }
+  void _snack(String m, {bool error=false}) => AppSnack.show(context, m, error: error);
 
   @override
   Widget build(BuildContext context) {

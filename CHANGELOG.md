@@ -10,3 +10,8 @@ All notable changes to this project will be documented in this file.
 ### Added
 - Align API services with backend paths and allow http client injection.
 - Added unit tests for auth, profile, visit, and chat services.
+
+## [0.1.2] - 2025-08-14
+### Fixed
+- Correct login parameter names to match backend expectations.
+- Require national code input for previous prescription lookup and use AppSnack utility.
