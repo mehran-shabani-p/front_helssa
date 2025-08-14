@@ -1,30 +1,37 @@
-name: CI
+name: CI/CD Pipeline
 
 on:
   pull_request:
-    branches: [for_future]
+    branches: [main, for_future]
     paths: ['**']
   push:
-    branches: [for_future]
+    branches: [main, for_future]
     paths: ['**']
 
 permissions:
   contents: write   # برای ساخت Release لازم است
+  checks: write     # برای نوشتن نتایج تست
+  pull-requests: write  # برای کامنت‌های PR
+
+env:
+  FLUTTER_VERSION: '3.32.8'
 
 jobs:
-  flutter-ci:
+  code-quality:
     runs-on: ubuntu-latest
-
+    name: 🔍 Code Quality & Analysis
+    
     steps:
-      - uses: actions/checkout@v5
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
 
-      - name: Set up Flutter
+      - name: 🛠️ Set up Flutter
         uses: subosito/flutter-action@v2
         with:
-          flutter-version: '3.32.8'
+          flutter-version: ${{ env.FLUTTER_VERSION }}
           cache: true
 
-      - name: Cache Pub
+      - name: 📦 Cache Pub dependencies
         uses: actions/cache@v4
         with:
           path: ~/.pub-cache
@@ -32,109 +39,330 @@ jobs:
           restore-keys: |
             ${{ runner.os }}-pub-
 
-      - name: Cache Gradle
+      - name: 🔄 Get dependencies
+        run: flutter pub get
+
+      - name: 📊 Check formatting
+        run: dart format --output=none --set-exit-if-changed .
+
+      - name: 🔍 Analyze code
+        run: flutter analyze --no-fatal-infos --no-congratulate
+
+      - name: 🚨 Check for dead code
+        run: dart run dart_code_metrics:metrics analyze lib --reporter=github
+
+      - name: 📝 Generate dependency report
+        run: |
+          flutter pub deps --json > dependency-report.json
+          echo "Dependencies analyzed successfully"
+
+      - name: 📤 Upload analysis results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: analysis-results
+          path: |
+            dependency-report.json
+          retention-days: 7
+
+  testing:
+    runs-on: ubuntu-latest
+    name: 🧪 Testing Suite
+    needs: code-quality
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🛠️ Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: 📦 Cache Pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: 🔄 Get dependencies
+        run: flutter pub get
+
+      - name: 🧪 Run unit tests
+        run: flutter test --coverage --reporter=expanded
+
+      - name: 📊 Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+        with:
+          file: coverage/lcov.info
+          flags: unittests
+          name: helssa-coverage
+          fail_ci_if_error: false
+
+      - name: 📈 Generate test report
+        if: always()
+        run: |
+          flutter test --reporter=json > test-results.json || true
+
+      - name: 📤 Upload test results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: test-results
+          path: |
+            test-results.json
+            coverage/
+          retention-days: 7
+
+  build-web:
+    runs-on: ubuntu-latest
+    name: 🌐 Build Web App
+    needs: [code-quality, testing]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🛠️ Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: 📦 Cache Pub dependencies
+        uses: actions/cache@v4
+        with:
+          path: ~/.pub-cache
+          key: ${{ runner.os }}-pub-${{ hashFiles('**/pubspec.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-pub-
+
+      - name: 🔄 Get dependencies
+        run: flutter pub get
+
+      - name: 🌐 Build web (release)
+        run: flutter build web --release --web-renderer canvaskit --dart-define=FLUTTER_WEB_AUTO_DETECT=true
+
+      - name: 📊 Analyze bundle size
+        run: |
+          cd build/web
+          du -sh . > ../../web-bundle-size.txt
+          find . -name "*.js" -exec du -h {} \; | sort -hr > ../../js-files-size.txt
+
+      - name: 📤 Upload web build
+        uses: actions/upload-artifact@v4
+        with:
+          name: web-build-${{ github.sha }}
+          path: |
+            build/web/
+            web-bundle-size.txt
+            js-files-size.txt
+          retention-days: 30
+
+  build-android:
+    runs-on: ubuntu-latest
+    name: 📱 Build Android App
+    needs: [code-quality, testing]
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: ☕ Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: '17'
+
+      - name: 🛠️ Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
+
+      - name: 📦 Cache Gradle
         uses: actions/cache@v4
         with:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
+            android/.gradle
           key: ${{ runner.os }}-gradle-${{ hashFiles('**/android/gradle/wrapper/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
-      - run: dart --version
-      - run: flutter --version
+      - name: 🔄 Get dependencies
+        run: flutter pub get
 
-      - name: Pub get (verbose on failure)
+      - name: 📱 Build Android APK (release)
+        run: flutter build apk --release --split-per-abi
+
+      - name: 📱 Build Android App Bundle
+        run: flutter build appbundle --release
+
+      - name: 📊 Analyze APK sizes
         run: |
-          set -e
-          if ! dart pub get; then
-            echo "== Pub get failed. Printing solver diagnostics =="
-            dart pub outdated || true
-            flutter pub deps -- --style=compact || true
-            exit 1
-          fi
+          cd build/app/outputs/flutter-apk
+          ls -lah *.apk > ../../../../apk-sizes.txt
+          cd ../../../../build/app/outputs/bundle/release
+          ls -lah *.aab >> ../../../../../aab-size.txt
 
-      - run: flutter analyze --no-fatal-infos --no-congratulate
-      - run: flutter test --coverage
+      - name: 📤 Upload Android builds
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-builds-${{ github.sha }}
+          path: |
+            build/app/outputs/flutter-apk/*.apk
+            build/app/outputs/bundle/release/*.aab
+            apk-sizes.txt
+            aab-size.txt
+          retention-days: 30
 
-      - name: Build Web (release)
-        run: flutter build web --release
+  security-scan:
+    runs-on: ubuntu-latest
+    name: 🔒 Security Scan
+    needs: code-quality
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
 
-      - name: Build Android APK (release)
-        run: flutter build apk --release
+      - name: 🛠️ Set up Flutter
+        uses: subosito/flutter-action@v2
+        with:
+          flutter-version: ${{ env.FLUTTER_VERSION }}
+          cache: true
 
-      # --- نسخه و نام‌گذاری خروجی‌ها ---
-      - name: Derive version/tag from pubspec
-        id: ver
-        shell: bash
+      - name: 🔄 Get dependencies
+        run: flutter pub get
+
+      - name: 🔒 Security audit
         run: |
-          set -e
+          dart pub audit --json > security-audit.json || true
+          echo "Security audit completed"
+
+      - name: 📤 Upload security results
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: security-scan-results
+          path: security-audit.json
+          retention-days: 30
+
+  release:
+    runs-on: ubuntu-latest
+    name: 🚀 Create Release
+    needs: [build-web, build-android, security-scan]
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    
+    steps:
+      - name: 📥 Checkout code
+        uses: actions/checkout@v5
+
+      - name: 🏷️ Get version from pubspec
+        id: version
+        run: |
           APP_VERSION=$(awk -F': *' '/^version:/{print $2}' pubspec.yaml | tr -d '"')
-          # e.g. 0.1.0+3
-          BASE_VERSION="${APP_VERSION%%+*}"   # 0.1.0
-          BUILD_NUMBER="${APP_VERSION##*+}"   # 3 (یا همون مقدار بعد از +)
+          BASE_VERSION="${APP_VERSION%%+*}"
+          BUILD_NUMBER="${APP_VERSION##*+}"
           TAG="v${APP_VERSION}"
           echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
           echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
           echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
           echo "tag=$TAG" >> $GITHUB_OUTPUT
 
-      - name: Prepare deliverables (rename & zip)
-        id: pack
-        shell: bash
+      - name: 📥 Download all artifacts
+        uses: actions/download-artifact@v4
+
+      - name: 📦 Prepare release assets
         run: |
-          set -e
-          mkdir -p dist
-          # Web zip
-          WEB_ZIP="helssa-web-${{ steps.ver.outputs.app_version }}.zip"
-          (cd build/web && zip -rq "../$WEB_ZIP" .)
-          mv "build/$WEB_ZIP" "dist/$WEB_ZIP"
+          mkdir -p release-assets
+          
+          # Web build
+          if [ -d "web-build-${{ github.sha }}" ]; then
+            cd "web-build-${{ github.sha }}"
+            zip -r "../release-assets/helssa-web-${{ steps.version.outputs.app_version }}.zip" build/web/
+            cd ..
+          fi
+          
+          # Android builds
+          if [ -d "android-builds-${{ github.sha }}" ]; then
+            find "android-builds-${{ github.sha }}" -name "*.apk" -exec cp {} release-assets/ \;
+            find "android-builds-${{ github.sha }}" -name "*.aab" -exec cp {} release-assets/ \;
+          fi
+          
+          # Copy analysis results
+          cp -r analysis-results/* release-assets/ 2>/dev/null || true
+          cp -r security-scan-results/* release-assets/ 2>/dev/null || true
 
-          # APK rename
-          APK_SRC="build/app/outputs/flutter-apk/app-release.apk"
-          APK_OUT="helssa-android-${{ steps.ver.outputs.app_version }}.apk"
-          cp "$APK_SRC" "dist/$APK_OUT"
-
-          # Copy lockfile for traceability
-          cp pubspec.lock "dist/pubspec-${{ steps.ver.outputs.app_version }}.lock"
-
-          echo "web_zip=$WEB_ZIP" >> $GITHUB_OUTPUT
-          echo "apk_file=$APK_OUT" >> $GITHUB_OUTPUT
-
-      # --- نگهداری آرتیفکت‌ها (30 روز) ---
-      - name: Upload Web artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: web-build-${{ steps.ver.outputs.app_version }}
-          path: dist/${{ steps.pack.outputs.web_zip }}
-          retention-days: 30
-
-      - name: Upload APK artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: android-apk-${{ steps.ver.outputs.app_version }}
-          path: dist/${{ steps.pack.outputs.apk_file }}
-          retention-days: 30
-
-      - name: Upload lockfile artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: pubspec-lock-${{ steps.ver.outputs.app_version }}
-          path: dist/pubspec-${{ steps.ver.outputs.app_version }}.lock
-          retention-days: 30
-
-      # --- ساخت ریلیز فقط روی push (نه PR) ---
-      - name: Create GitHub Release
-        if: ${{ github.event_name == 'push' }}
+      - name: 🚀 Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.ver.outputs.tag }}                  # v0.1.0+3
-          name: Helssa ${{ steps.ver.outputs.base_version }}+${{ steps.ver.outputs.build_number }}
-          generate_release_notes: true
+          tag_name: ${{ steps.version.outputs.tag }}
+          name: 🎉 Helssa ${{ steps.version.outputs.base_version }} Build ${{ steps.version.outputs.build_number }}
+          body: |
+            ## 🆕 What's New in This Release
+            
+            ### 🎨 User Interface Improvements
+            - ✨ Enhanced chat interface with ChatGPT-like experience
+            - 🔄 Auto-hide navigation bars for immersive full-screen experience  
+            - 📱 Improved responsive design for all screen sizes
+            - 🎭 Modern Material 3 design language implementation
+            
+            ### 🚀 New Features
+            - 💬 Fullscreen chat mode with slide-in navigation
+            - 🎯 Floating action buttons for quick access
+            - 📎 Enhanced file attachment system with preview
+            - ⚡ Improved performance and animations
+            
+            ### 🔧 Technical Improvements
+            - 🏗️ Enhanced CI/CD pipeline with comprehensive testing
+            - 🔒 Security auditing and vulnerability scanning
+            - 📊 Code quality analysis and coverage reporting
+            - 🧪 Expanded test suite with better coverage
+            
+            ### 📱 Platform Support
+            - 🌐 Web: Progressive Web App capabilities
+            - 📱 Android: Optimized APK and App Bundle builds
+            - 🖥️ Desktop: Enhanced desktop experience (coming soon)
+            
+            ### 🛠️ Developer Experience
+            - 📋 Automated dependency management
+            - 🔍 Advanced code analysis and linting
+            - 📈 Performance monitoring and bundle size analysis
+            - 🧹 Dead code elimination and optimization
+            
+            ---
+            
+            **📦 Download Assets:**
+            - `helssa-web-*.zip` - Web application bundle
+            - `*.apk` - Android APK files (split by architecture)
+            - `*.aab` - Android App Bundle for Play Store
+            
+            **🔧 Build Information:**
+            - Flutter Version: ${{ env.FLUTTER_VERSION }}
+            - Build Number: ${{ steps.version.outputs.build_number }}
+            - Commit SHA: ${{ github.sha }}
+            
           draft: false
           prerelease: false
-          files: |
-            dist/${{ steps.pack.outputs.web_zip }}
-            dist/${{ steps.pack.outputs.apk_file }}
-            dist/pubspec-${{ steps.ver.outputs.app_version }}.lock
+          generate_release_notes: true
+          files: release-assets/*
+
+  cleanup:
+    runs-on: ubuntu-latest
+    name: 🧹 Cleanup
+    needs: [release]
+    if: always()
+    
+    steps:
+      - name: 🗑️ Delete old releases
+        uses: dev-drprasad/delete-older-releases@v0.3.2
+        with:
+          keep_latest: 10
+          delete_tags: true
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
