@@ -2,6 +2,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
 import 'package:share_plus/share_plus.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -121,7 +122,7 @@ class _ChatPageState extends State<ChatPage> {
   void _shareSession() {
     if (_active == null || _active!.messages.isEmpty) return;
     final text = _active!.messages.map((m) => '${m.sender}: ${m.text}${m.imagesB64.isNotEmpty ? ' [تصویر]' : ''}').join('\n');
-    Share.share(text, subject: _active!.title);
+    SharePlus.instance.share(text, subject: _active!.title);
   }
 
   Future<void> _send(String text, {List<String> imagesB64 = const [], String? pdfText}) async {

@@ -8,7 +8,12 @@ class OcrService {
     if (kIsWeb) return '';
     final input = InputImage.fromBytes(
       bytes: imageBytes,
-      metadata: const InputImageMetadata(size: Size(0, 0), rotation: InputImageRotation.rotation0deg, bytesPerRow: 0),
+      metadata: InputImageMetadata(
+        size: const Size(0, 0),
+        rotation: InputImageRotation.rotation0deg,
+        bytesPerRow: 0,
+        format: InputImageFormat.bgra8888,
+      ),
     );
     final rec = TextRecognizer();
     final res = await rec.processImage(input);

@@ -83,8 +83,8 @@ class _Painter extends CustomPainter {
     m.ensure(s);
     if (m.ps.isEmpty) return;
 
-    final dot = Paint()..color = Colors.white.withOpacity(.12);
-    final line = Paint()..color = Colors.white.withOpacity(.06)..strokeWidth = .6;
+    final dot = Paint()..color = Colors.white.withValues(alpha: .12);
+    final line = Paint()..color = Colors.white.withValues(alpha: .06)..strokeWidth = .6;
 
     const maxDist2 = 110*110;
     for (int i = 0; i < m.ps.length; i++) {
@@ -95,12 +95,12 @@ class _Painter extends CustomPainter {
         final d2 = dx*dx + dy*dy;
         if (d2 < maxDist2) {
           final t = 1 - (d2 / maxDist2);
-          line.color = Colors.white.withOpacity(.05 + .10*t);
+          line.color = Colors.white.withValues(alpha: .05 + .10*t);
           c.drawLine(pi.pos, pj.pos, line);
         }
       }
     }
-    for (final p in m.ps) { dot.color = Colors.white.withOpacity(p.a); c.drawCircle(p.pos, p.r, dot); }
+    for (final p in m.ps) { dot.color = Colors.white.withValues(alpha: p.a); c.drawCircle(p.pos, p.r, dot); }
   }
 
   @override

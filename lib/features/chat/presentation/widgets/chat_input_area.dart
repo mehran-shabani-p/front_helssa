@@ -1,6 +1,5 @@
 // ignore_for_file: deprecated_member_use
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -23,8 +22,6 @@ class _ChatInputAreaState extends State<ChatInputArea> {
   final _media = MediaService();
   final List<Uint8List> _images = [];
   String? _pdfText;
-
-  bool get _hasText => widget.controller.text.trim().isNotEmpty;
 
   Future<void> _pick(ImageSource src) async {
     final b = await _media.pick(src);
