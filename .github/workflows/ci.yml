@@ -8,6 +8,9 @@ on:
     branches: [for_future]
     paths: ['**']
 
+permissions:
+  contents: write   # برای ساخت Release لازم است
+
 jobs:
   flutter-ci:
     runs-on: ubuntu-latest
@@ -61,11 +64,77 @@ jobs:
       - name: Build Android APK (release)
         run: flutter build apk --release
 
-      - name: Upload artifacts
+      # --- نسخه و نام‌گذاری خروجی‌ها ---
+      - name: Derive version/tag from pubspec
+        id: ver
+        shell: bash
+        run: |
+          set -e
+          APP_VERSION=$(awk -F': *' '/^version:/{print $2}' pubspec.yaml | tr -d '"')
+          # e.g. 0.1.0+3
+          BASE_VERSION="${APP_VERSION%%+*}"   # 0.1.0
+          BUILD_NUMBER="${APP_VERSION##*+}"   # 3 (یا همون مقدار بعد از +)
+          TAG="v${APP_VERSION}"
+          echo "app_version=$APP_VERSION" >> $GITHUB_OUTPUT
+          echo "base_version=$BASE_VERSION" >> $GITHUB_OUTPUT
+          echo "build_number=$BUILD_NUMBER" >> $GITHUB_OUTPUT
+          echo "tag=$TAG" >> $GITHUB_OUTPUT
+
+      - name: Prepare deliverables (rename & zip)
+        id: pack
+        shell: bash
+        run: |
+          set -e
+          mkdir -p dist
+          # Web zip
+          WEB_ZIP="helssa-web-${{ steps.ver.outputs.app_version }}.zip"
+          (cd build/web && zip -rq "../$WEB_ZIP" .)
+          mv "build/$WEB_ZIP" "dist/$WEB_ZIP"
+
+          # APK rename
+          APK_SRC="build/app/outputs/flutter-apk/app-release.apk"
+          APK_OUT="helssa-android-${{ steps.ver.outputs.app_version }}.apk"
+          cp "$APK_SRC" "dist/$APK_OUT"
+
+          # Copy lockfile for traceability
+          cp pubspec.lock "dist/pubspec-${{ steps.ver.outputs.app_version }}.lock"
+
+          echo "web_zip=$WEB_ZIP" >> $GITHUB_OUTPUT
+          echo "apk_file=$APK_OUT" >> $GITHUB_OUTPUT
+
+      # --- نگهداری آرتیفکت‌ها (30 روز) ---
+      - name: Upload Web artifact
         uses: actions/upload-artifact@v4
         with:
-          name: ci-artifacts
-          path: |
-            build/web
-            build/app/outputs/flutter-apk/app-release.apk
-            pubspec.lock
+          name: web-build-${{ steps.ver.outputs.app_version }}
+          path: dist/${{ steps.pack.outputs.web_zip }}
+          retention-days: 30
+
+      - name: Upload APK artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: android-apk-${{ steps.ver.outputs.app_version }}
+          path: dist/${{ steps.pack.outputs.apk_file }}
+          retention-days: 30
+
+      - name: Upload lockfile artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: pubspec-lock-${{ steps.ver.outputs.app_version }}
+          path: dist/pubspec-${{ steps.ver.outputs.app_version }}.lock
+          retention-days: 30
+
+      # --- ساخت ریلیز فقط روی push (نه PR) ---
+      - name: Create GitHub Release
+        if: ${{ github.event_name == 'push' }}
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ steps.ver.outputs.tag }}                  # v0.1.0+3
+          name: Helssa ${{ steps.ver.outputs.base_version }}+${{ steps.ver.outputs.build_number }}
+          generate_release_notes: true
+          draft: false
+          prerelease: false
+          files: |
+            dist/${{ steps.pack.outputs.web_zip }}
+            dist/${{ steps.pack.outputs.apk_file }}
+            dist/pubspec-${{ steps.ver.outputs.app_version }}.lock

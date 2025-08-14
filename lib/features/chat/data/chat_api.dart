@@ -3,16 +3,22 @@ import 'package:http/http.dart' as http;
 import '../../../core/constants.dart';
 
 class ChatApi {
+  ChatApi(this.accessToken, {http.Client? client})
+      : _client = client ?? http.Client();
   final String accessToken;
-  ChatApi(this.accessToken);
+  final http.Client _client;
 
   Future<Map<String, dynamic>> send({required String text, List<String> imagesB64 = const []}) async {
     final uri = Uri.parse('$baseUrl/chat/msg/');
     final body = <String, dynamic>{'message': text};
     if (imagesB64.isNotEmpty) body['images'] = imagesB64;
 
-    final resp = await http.post(uri,
-      headers: {'Content-Type': 'application/json; charset=utf-8', 'Authorization': 'Bearer $accessToken'},
+    final resp = await _client.post(
+      uri,
+      headers: {
+        'Content-Type': 'application/json; charset=utf-8',
+        'Authorization': 'Bearer $accessToken'
+      },
       body: jsonEncode(body),
     );
 
