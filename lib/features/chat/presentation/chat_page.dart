@@ -1,6 +1,5 @@
 // ignore_for_file: use_build_context_synchronously
 import 'dart:convert';
-import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
@@ -54,7 +53,9 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _loadSessions() async {
     final all = await _storage.loadAll();
-    final activeId = widget.sessionId == 'new' ? await _storage.getActiveId() : widget.sessionId;
+    final activeId = widget.sessionId == 'new'
+        ? await _storage.getActiveId()
+        : widget.sessionId;
 
     setState(() => _sessions = all);
 
@@ -69,7 +70,8 @@ class _ChatPageState extends State<ChatPage> {
 
   ChatSession _newSessionSync() {
     final id = DateTime.now().millisecondsSinceEpoch.toString();
-    final s = ChatSession(id: id, title: 'جلسه جدید', createdAt: DateTime.now(), messages: []);
+    final s = ChatSession(
+        id: id, title: 'جلسه جدید', createdAt: DateTime.now(), messages: []);
     _sessions.insert(0, s);
     _active = s;
     return s;
@@ -91,8 +93,11 @@ class _ChatPageState extends State<ChatPage> {
         title: const Text('نام‌گذاری جلسه'),
         content: TextField(controller: c, autofocus: true),
         actions: [
-          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('لغو')),
-          TextButton(onPressed: () => Navigator.pop(ctx, c.text.trim()), child: const Text('ذخیره')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx), child: const Text('لغو')),
+          TextButton(
+              onPressed: () => Navigator.pop(ctx, c.text.trim()),
+              child: const Text('ذخیره')),
         ],
       ),
     );
@@ -103,7 +108,8 @@ class _ChatPageState extends State<ChatPage> {
 
   Future<void> _deleteSession(ChatSession s) async {
     if (_sessions.length == 1) {
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('حداقل یک جلسه باید باقی بماند.')));
+      ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('حداقل یک جلسه باید باقی بماند.')));
       return;
     }
     _sessions.removeWhere((e) => e.id == s.id);
@@ -121,15 +127,20 @@ class _ChatPageState extends State<ChatPage> {
 
   void _shareSession() {
     if (_active == null || _active!.messages.isEmpty) return;
-    final text = _active!.messages.map((m) => '${m.sender}: ${m.text}${m.imagesB64.isNotEmpty ? ' [تصویر]' : ''}').join('\n');
-    SharePlus.instance.share(text, subject: _active!.title);
+    final text = _active!.messages
+        .map((m) =>
+            '${m.sender}: ${m.text}${m.imagesB64.isNotEmpty ? ' [تصویر]' : ''}')
+        .join('\n');
+    SharePlus.instance.share(ShareParams(text: text, subject: _active!.title));
   }
 
-  Future<void> _send(String text, {List<String> imagesB64 = const [], String? pdfText}) async {
+  Future<void> _send(String text,
+      {List<String> imagesB64 = const [], String? pdfText}) async {
     if (_active == null) return;
 
     if (pdfText != null && pdfText.isNotEmpty) {
-      final extracted = await _pdf.extract(Uint8List.fromList(base64Decode(pdfText)));
+      final extracted =
+          await _pdf.extract(Uint8List.fromList(base64Decode(pdfText)));
       text = '$text\n\n[متن PDF]\n$extracted';
       imagesB64 = const [];
     }
@@ -144,9 +155,17 @@ class _ChatPageState extends State<ChatPage> {
     }
 
     final now = DateTime.now();
-    final user = ChatMessage(id: now.toIso8601String(), sender: 'user', text: text.isEmpty ? '(بدون متن)' : text, timestamp: now, imagesB64: imagesB64);
+    final user = ChatMessage(
+        id: now.toIso8601String(),
+        sender: 'user',
+        text: text.isEmpty ? '(بدون متن)' : text,
+        timestamp: now,
+        imagesB64: imagesB64);
 
-    setState(() { _active!.messages.add(user); _typing = true; });
+    setState(() {
+      _active!.messages.add(user);
+      _typing = true;
+    });
     await _persist();
     _scrollToBottom();
 
@@ -154,7 +173,8 @@ class _ChatPageState extends State<ChatPage> {
     final token = prefs.getString('access_token');
     if (token == null || token.isEmpty) {
       setState(() => _typing = false);
-      ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('توکن دسترسی یافت نشد.')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(const SnackBar(content: Text('توکن دسترسی یافت نشد.')));
       return;
     }
 
@@ -162,10 +182,17 @@ class _ChatPageState extends State<ChatPage> {
       final api = ChatApi(token);
       final resp = await api.send(text: user.text, imagesB64: imagesB64);
       final botText = (resp['answer'] ?? '').toString();
-      final images = ((resp['images'] as List?) ?? const <dynamic>[]).map((e) => e.toString()).toList();
+      final images = ((resp['images'] as List?) ?? const <dynamic>[])
+          .map((e) => e.toString())
+          .toList();
 
       setState(() {
-        _active!.messages.add(ChatMessage(id: DateTime.now().toIso8601String(), sender: 'bot', text: botText, timestamp: DateTime.now(), imagesB64: images));
+        _active!.messages.add(ChatMessage(
+            id: DateTime.now().toIso8601String(),
+            sender: 'bot',
+            text: botText,
+            timestamp: DateTime.now(),
+            imagesB64: images));
         _typing = false;
         if (_active!.title == 'جلسه جدید' && user.text.trim().isNotEmpty) {
           _active!.title = user.text.trim().split('\n').first.take(30);
@@ -175,14 +202,16 @@ class _ChatPageState extends State<ChatPage> {
       _scrollToBottom();
     } catch (e) {
       setState(() => _typing = false);
-      ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text('خطا در ارسال: $e')));
+      ScaffoldMessenger.of(context)
+          .showSnackBar(SnackBar(content: Text('خطا در ارسال: $e')));
     }
   }
 
   void _scrollToBottom() {
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!_scroll.hasClients) return;
-      _scroll.animateTo(_scroll.position.maxScrollExtent, duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
+      _scroll.animateTo(_scroll.position.maxScrollExtent,
+          duration: const Duration(milliseconds: 250), curve: Curves.easeOut);
     });
   }
 
@@ -191,7 +220,9 @@ class _ChatPageState extends State<ChatPage> {
     return Scaffold(
       appBar: AppBar(
         title: Text(_active?.title ?? 'چت'),
-        actions: [IconButton(onPressed: _shareSession, icon: const Icon(Icons.share))],
+        actions: [
+          IconButton(onPressed: _shareSession, icon: const Icon(Icons.share))
+        ],
       ),
       drawer: SessionDrawer(
         sessions: _sessions,
@@ -206,22 +237,35 @@ class _ChatPageState extends State<ChatPage> {
             Expanded(
               child: ListView.builder(
                 controller: _scroll,
-                padding: const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
+                padding:
+                    const EdgeInsets.symmetric(vertical: 12, horizontal: 8),
                 itemCount: _active?.messages.length ?? 0,
                 itemBuilder: (_, i) {
                   final m = _active!.messages[i];
                   return MessageBubble(
                     msg: m,
-                    onCopy: () => Clipboard.setData(ClipboardData(text: m.text)),
-                    onDelete: () async { setState(() => _active!.messages.removeAt(i)); await _persist(); },
+                    onCopy: () =>
+                        Clipboard.setData(ClipboardData(text: m.text)),
+                    onDelete: () async {
+                      setState(() => _active!.messages.removeAt(i));
+                      await _persist();
+                    },
                   );
                 },
               ),
             ),
-            if (_typing) const Padding(padding: EdgeInsets.only(bottom: 6), child: Text('در حال نوشتن...', style: TextStyle(color: Colors.grey))),
+            if (_typing)
+              const Padding(
+                  padding: EdgeInsets.only(bottom: 6),
+                  child: Text('در حال نوشتن...',
+                      style: TextStyle(color: Colors.grey))),
             Padding(
-              padding: EdgeInsets.only(left: 8, right: 8, bottom: MediaQuery.of(context).padding.bottom + 8),
-              child: ChatInputArea(controller: _controller, focus: _focus, onSend: _send),
+              padding: EdgeInsets.only(
+                  left: 8,
+                  right: 8,
+                  bottom: MediaQuery.of(context).padding.bottom + 8),
+              child: ChatInputArea(
+                  controller: _controller, focus: _focus, onSend: _send),
             ),
           ],
         ),
